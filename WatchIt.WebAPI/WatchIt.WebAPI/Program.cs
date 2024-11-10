@@ -146,6 +146,7 @@ public static class Program
     private static WebApplicationBuilder SetupDatabase(this WebApplicationBuilder builder)
     {
         builder.Services.AddDbContext<DatabaseContext>(x => x.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("Default")), ServiceLifetime.Transient);
+        builder.Services.AddDbContext<DatabaseContextNew>(x => x.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("Default")), ServiceLifetime.Transient);
         return builder;
     }
 
