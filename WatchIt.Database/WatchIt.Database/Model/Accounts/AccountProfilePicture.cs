@@ -5,6 +5,7 @@ public class AccountProfilePicture : IImageEntity
     #region PROPERTIES
 
     public Guid Id { get; set; }
+    public long AccountId { get; set; }
     public byte[] Image { get; set; } = default!;
     public string MimeType { get; set; } = default!;
     public DateTimeOffset UploadDate { get; set; }

@@ -64,17 +64,10 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                .HasMaxLength(1000);
         
         // Gender
+        builder.HasOne(x => x.Gender)
+               .WithMany(x => x.Accounts)
+               .HasForeignKey(x => x.GenderId);
         builder.Property(x => x.GenderId);
-        
-        // Profile picture
-        builder.HasOne(x => x.ProfilePicture)
-               .WithOne(x => x.Account)
-               .HasForeignKey<Account>(x => x.ProfilePictureId);
-        builder.Property(x => x.ProfilePictureId);
-        
-        // Background picture
-        builder.Property(x => x.BackgroundPictureId);
-
 
 
         #region Navigation

@@ -10,7 +10,7 @@ public class AccountFollowConfiguration : IEntityTypeConfiguration<AccountFollow
     
     public void Configure(EntityTypeBuilder<AccountFollow> builder)
     {
-        builder.ToTable("AccountFollow", "accounts");
+        builder.ToTable("AccountFollows", "accounts");
         
         // Id
         builder.HasKey(x => x.Id);

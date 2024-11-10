@@ -12,8 +12,8 @@ using WatchIt.Database;
 namespace WatchIt.Database.Migrations
 {
     [DbContext(typeof(DatabaseContextNew))]
-    [Migration("20241110205613_AccountsTablesRefactor")]
-    partial class AccountsTablesRefactor
+    [Migration("20241110225157_AccountsTables")]
+    partial class AccountsTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,9 +40,6 @@ namespace WatchIt.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
-
-                    b.Property<Guid?>("BackgroundPictureId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -76,9 +73,6 @@ namespace WatchIt.Database.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("bytea");
 
-                    b.Property<Guid?>("ProfilePictureId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("RightSalt")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -91,10 +85,9 @@ namespace WatchIt.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
+                    b.HasIndex("GenderId");
 
-                    b.HasIndex("ProfilePictureId")
+                    b.HasIndex("Id")
                         .IsUnique();
 
                     b.ToTable("Accounts", "accounts");
@@ -121,7 +114,7 @@ namespace WatchIt.Database.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("AccountFollow", "accounts");
+                    b.ToTable("AccountFollows", "accounts");
                 });
 
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountProfilePicture", b =>
@@ -129,6 +122,9 @@ namespace WatchIt.Database.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
 
                     b.Property<byte[]>("Image")
                         .IsRequired()
@@ -147,10 +143,13 @@ namespace WatchIt.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("AccountProfilePicture", "accounts");
+                    b.ToTable("AccountProfilePictures", "accounts");
                 });
 
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountRefreshToken", b =>
@@ -178,13 +177,33 @@ namespace WatchIt.Database.Migrations
                     b.ToTable("AccountRefreshTokens", "accounts");
                 });
 
+            modelBuilder.Entity("WatchIt.Database.Model.Genders.Gender", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("Genders", "genders");
+                });
+
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.Account", b =>
                 {
-                    b.HasOne("WatchIt.Database.Model.Accounts.AccountProfilePicture", "ProfilePicture")
-                        .WithOne("Account")
-                        .HasForeignKey("WatchIt.Database.Model.Accounts.Account", "ProfilePictureId");
+                    b.HasOne("WatchIt.Database.Model.Genders.Gender", "Gender")
+                        .WithMany("Accounts")
+                        .HasForeignKey("GenderId");
 
-                    b.Navigation("ProfilePicture");
+                    b.Navigation("Gender");
                 });
 
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountFollow", b =>
@@ -206,6 +225,17 @@ namespace WatchIt.Database.Migrations
                     b.Navigation("Follower");
                 });
 
+            modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountProfilePicture", b =>
+                {
+                    b.HasOne("WatchIt.Database.Model.Accounts.Account", "Account")
+                        .WithOne("ProfilePicture")
+                        .HasForeignKey("WatchIt.Database.Model.Accounts.AccountProfilePicture", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountRefreshToken", b =>
                 {
                     b.HasOne("WatchIt.Database.Model.Accounts.Account", "Account")
@@ -223,13 +253,14 @@ namespace WatchIt.Database.Migrations
 
                     b.Navigation("FollowsRelationObjects");
 
+                    b.Navigation("ProfilePicture");
+
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountProfilePicture", b =>
+            modelBuilder.Entity("WatchIt.Database.Model.Genders.Gender", b =>
                 {
-                    b.Navigation("Account")
-                        .IsRequired();
+                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,3 +1,5 @@
+using WatchIt.Database.Model.Genders;
+
 namespace WatchIt.Database.Model.Accounts;
 
 public class Account
@@ -15,8 +17,6 @@ public class Account
     public DateTimeOffset ActiveDate { get; set; }
     public string? Description { get; set; }
     public short? GenderId { get; set; }
-    public Guid? ProfilePictureId { get; set; }
-    public Guid? BackgroundPictureId { get; set; }
 
     #endregion
     
@@ -25,7 +25,7 @@ public class Account
     #region NAVIGATION
     
     // Profile picture
-    public virtual AccountProfilePicture ProfilePicture { get; set; } = default!;
+    public virtual AccountProfilePicture? ProfilePicture { get; set; }
     
     // Refresh tokens
     public virtual IEnumerable<AccountRefreshToken> RefreshTokens { get; set; } = default!;
@@ -37,6 +37,9 @@ public class Account
     // Followers
     public virtual IEnumerable<AccountFollow> FollowersRelationObjects { get; set; } = default!;
     public virtual IEnumerable<Account> Followers { get; set; } = default!;
+    
+    // Gender
+    public virtual Gender? Gender { get; set; }
     
     #endregion
 }
