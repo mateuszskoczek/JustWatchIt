@@ -23,6 +23,12 @@ public abstract class Medium
     // Genres
     public virtual IEnumerable<MediumGenre> GenresRelationshipObjects { get; set; } = [];
     public virtual IEnumerable<Genre> Genres { get; set; } = [];
+    
+    // Picture
+    public virtual MediumPicture Picture { get; set; } = default!;
+    
+    // Photos
+    public virtual IEnumerable<MediumPhoto> Photos { get; set; } = [];
 
     #endregion
 }

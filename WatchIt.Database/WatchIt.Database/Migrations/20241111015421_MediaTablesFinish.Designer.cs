@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WatchIt.Database;
@@ -11,9 +12,11 @@ using WatchIt.Database;
 namespace WatchIt.Database.Migrations
 {
     [DbContext(typeof(DatabaseContextNew))]
-    partial class DatabaseContextNewModelSnapshot : ModelSnapshot
+    [Migration("20241111015421_MediaTablesFinish")]
+    partial class MediaTablesFinish
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,6 +301,7 @@ namespace WatchIt.Database.Migrations
 
                     b.Property<byte[]>("FirstGradientColor")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .HasColumnType("bytea");
 
                     b.Property<bool>("IsUniversal")
@@ -307,6 +311,7 @@ namespace WatchIt.Database.Migrations
 
                     b.Property<byte[]>("SecondGradientColor")
                         .IsRequired()
+                        .HasMaxLength(3)
                         .HasColumnType("bytea");
 
                     b.HasKey("PhotoId");

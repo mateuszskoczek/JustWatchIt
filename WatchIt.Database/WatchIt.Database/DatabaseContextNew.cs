@@ -8,6 +8,7 @@ using SimpleToolkit.Extensions;
 using WatchIt.Database.Model.Accounts;
 using WatchIt.Database.Model.Genders;
 using WatchIt.Database.Model.Genres;
+using WatchIt.Database.Model.Media;
 
 namespace WatchIt.Database;
 
@@ -28,6 +29,13 @@ public class DatabaseContextNew : DbContext
 
 
     #region PROPERTIES
+    
+    // Media
+    public virtual DbSet<Medium> Media { get; set; }
+    public virtual DbSet<MediumMovie> MediumMovies { get; set; }
+    public virtual DbSet<MediumSeries> MediumSeries { get; set; }
+    public virtual DbSet<MediumGenre> MediumGenres { get; set; }
+    public virtual DbSet<MediumPicture> MediumPictures { get; set; } 
     
     // Accounts
     public virtual DbSet<Account> Accounts { get; set; }

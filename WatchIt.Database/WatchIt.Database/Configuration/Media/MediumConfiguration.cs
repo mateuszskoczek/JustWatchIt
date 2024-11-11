@@ -42,7 +42,7 @@ public class MediumConfiguration : IEntityTypeConfiguration<Medium>
         
         // Duration
         builder.Property(x => x.Duration)
-               .HasConversion(new TimeSpanToTicksConverter());
+               .HasConversion<TimeSpanToTicksConverter>();
         
         // Release date
         builder.Property(x => x.ReleaseDate);
