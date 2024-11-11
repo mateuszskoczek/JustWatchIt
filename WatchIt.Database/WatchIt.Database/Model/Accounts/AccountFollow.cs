@@ -4,7 +4,6 @@ public class AccountFollow
 {
     #region PROPERTIES
     
-    public Guid Id { get; set; }
     public long FollowerId { get; set; }
     public long FollowedId { get; set; }
     
@@ -14,10 +13,10 @@ public class AccountFollow
     
     #region NAVIGATION
     
-    // Account follower
+    // Follower
     public virtual Account Follower { get; set; } = default!;
     
-    // Account followed
+    // Followed
     public virtual Account Followed { get; set; } = default!;
     
     #endregion

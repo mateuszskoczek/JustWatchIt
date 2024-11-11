@@ -28,15 +28,15 @@ public class Account
     public virtual AccountProfilePicture? ProfilePicture { get; set; }
     
     // Refresh tokens
-    public virtual IEnumerable<AccountRefreshToken> RefreshTokens { get; set; } = default!;
+    public virtual IEnumerable<AccountRefreshToken> RefreshTokens { get; set; } = [];
     
     // Follows
-    public virtual IEnumerable<AccountFollow> FollowsRelationObjects { get; set; } = default!;
-    public virtual IEnumerable<Account> Follows { get; set; } = default!;
+    public virtual IEnumerable<AccountFollow> FollowsRelationshipObjects { get; set; } = [];
+    public virtual IEnumerable<Account> Follows { get; set; } = [];
     
     // Followers
-    public virtual IEnumerable<AccountFollow> FollowersRelationObjects { get; set; } = default!;
-    public virtual IEnumerable<Account> Followers { get; set; } = default!;
+    public virtual IEnumerable<AccountFollow> FollowersRelationshipObjects { get; set; } = [];
+    public virtual IEnumerable<Account> Followers { get; set; } = [];
     
     // Gender
     public virtual Gender? Gender { get; set; }

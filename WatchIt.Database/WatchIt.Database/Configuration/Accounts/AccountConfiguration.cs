@@ -77,10 +77,10 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                .WithMany(x => x.Followers)
                .UsingEntity<AccountFollow>(
                    x => x.HasOne<Account>(y => y.Followed)
-                         .WithMany(y => y.FollowersRelationObjects)
+                         .WithMany(y => y.FollowersRelationshipObjects)
                          .HasForeignKey(y => y.FollowedId),
                    x => x.HasOne<Account>(y => y.Follower)
-                         .WithMany(y => y.FollowsRelationObjects)
+                         .WithMany(y => y.FollowsRelationshipObjects)
                          .HasForeignKey(y => y.FollowerId)
                );
 

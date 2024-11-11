@@ -11,20 +11,14 @@ public class AccountFollowConfiguration : IEntityTypeConfiguration<AccountFollow
     public void Configure(EntityTypeBuilder<AccountFollow> builder)
     {
         builder.ToTable("AccountFollows", "accounts");
+        builder.HasKey(x => new { x.FollowerId, x.FollowedId });
         
-        // Id
-        builder.HasKey(x => x.Id);
-        builder.HasIndex(x => x.Id)
-               .IsUnique();
-        builder.Property(x => x.Id)
-               .IsRequired();
-        
-        // Account follower
+        // Follower
         // FK configured in AccountConfiguration
         builder.Property(x => x.FollowerId)
                .IsRequired();
         
-        // Account followed
+        // Followed
         // FK configured in AccountConfiguration
         builder.Property(x => x.FollowedId)
                .IsRequired();

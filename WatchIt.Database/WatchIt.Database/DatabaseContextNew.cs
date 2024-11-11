@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using SimpleToolkit.Extensions;
 using WatchIt.Database.Model.Accounts;
 using WatchIt.Database.Model.Genders;
+using WatchIt.Database.Model.Genres;
 
 namespace WatchIt.Database;
 
@@ -36,7 +37,10 @@ public class DatabaseContextNew : DbContext
     
     // Genders
     public virtual DbSet<Gender> Genders { get; set; }
-
+    
+    // Genres
+    public virtual DbSet<Genre> Genres { get; set; }
+    
     #endregion
 
 

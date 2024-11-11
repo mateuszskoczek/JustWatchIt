@@ -10,13 +10,6 @@ public abstract class ImageEntityConfiguration<T> : IEntityTypeConfiguration<T> 
     
     public virtual void Configure(EntityTypeBuilder<T> builder)
     {
-        // Id
-        builder.HasKey(x => x.Id);
-        builder.HasIndex(x => x.Id)
-               .IsUnique();
-        builder.Property(x => x.Id)
-               .IsRequired();
-        
         // Image
         builder.Property(x => x.Image)
                .HasMaxLength(-1)

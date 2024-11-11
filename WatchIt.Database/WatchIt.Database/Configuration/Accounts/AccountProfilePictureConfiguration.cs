@@ -12,18 +12,19 @@ public class AccountProfilePictureConfiguration : ImageEntityConfiguration<Accou
     {
         builder.ToTable($"AccountProfilePictures", "accounts");
         
-        // Generic properties
-        base.Configure(builder);
-        
         // Account
+        builder.HasKey(x => x.AccountId);
+        builder.HasIndex(x => x.AccountId)
+               .IsUnique();
         builder.HasOne(x => x.Account)
                .WithOne(x => x.ProfilePicture)
                .HasForeignKey<AccountProfilePicture>(x => x.AccountId)
                .IsRequired();
-        builder.HasIndex(x => x.AccountId)
-               .IsUnique();
         builder.Property(x => x.AccountId)
                .IsRequired();
+        
+        // Generic properties
+        base.Configure(builder);
     }
     
     #endregion

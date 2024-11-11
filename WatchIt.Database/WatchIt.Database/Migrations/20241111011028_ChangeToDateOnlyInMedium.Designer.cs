@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WatchIt.Database;
@@ -11,9 +12,11 @@ using WatchIt.Database;
 namespace WatchIt.Database.Migrations
 {
     [DbContext(typeof(DatabaseContextNew))]
-    partial class DatabaseContextNewModelSnapshot : ModelSnapshot
+    [Migration("20241111011028_ChangeToDateOnlyInMedium")]
+    partial class ChangeToDateOnlyInMedium
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

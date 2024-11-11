@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WatchIt.Database;
@@ -11,9 +12,11 @@ using WatchIt.Database;
 namespace WatchIt.Database.Migrations
 {
     [DbContext(typeof(DatabaseContextNew))]
-    partial class DatabaseContextNewModelSnapshot : ModelSnapshot
+    [Migration("20241111010548_MediumTables")]
+    partial class MediumTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,8 +222,8 @@ namespace WatchIt.Database.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("character varying(250)");
 
-                    b.Property<DateOnly?>("ReleaseDate")
-                        .HasColumnType("date");
+                    b.Property<DateTimeOffset?>("ReleaseDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
