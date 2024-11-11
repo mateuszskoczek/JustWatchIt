@@ -16,7 +16,7 @@ public class PersonsControllerService : IPersonsControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContext _database;
+    private readonly DatabaseContextOld _database;
     private readonly IUserService _userService;
     
     #endregion
@@ -25,7 +25,7 @@ public class PersonsControllerService : IPersonsControllerService
     
     #region CONSTRUCTORS
 
-    public PersonsControllerService(DatabaseContext database, IUserService userService)
+    public PersonsControllerService(DatabaseContextOld database, IUserService userService)
     {
         _database = database;
         _userService = userService;

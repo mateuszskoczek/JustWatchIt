@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\WatchIt.Database\WatchIt.Database.Model\WatchIt.Database.Model\WatchIt.Database.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\WatchIt.Database\WatchIt.Database.Old\WatchIt.Database.Old.csproj" />
       <ProjectReference Include="..\..\..\..\WatchIt.Database\WatchIt.Database\WatchIt.Database.csproj" />
       <ProjectReference Include="..\WatchIt.WebAPI.Services.Utility.Configuration\WatchIt.WebAPI.Services.Utility.Configuration.csproj" />
     </ItemGroup>

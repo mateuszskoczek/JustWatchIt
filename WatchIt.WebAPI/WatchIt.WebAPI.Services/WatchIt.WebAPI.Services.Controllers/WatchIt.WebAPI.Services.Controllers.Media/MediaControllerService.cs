@@ -15,7 +15,7 @@ using WatchIt.WebAPI.Services.Utility.User;
 
 namespace WatchIt.WebAPI.Services.Controllers.Media;
 
-public class MediaControllerService(DatabaseContext database, IUserService userService) : IMediaControllerService
+public class MediaControllerService(DatabaseContextOld database, IUserService userService) : IMediaControllerService
 {
     #region PUBLIC METHODS
 

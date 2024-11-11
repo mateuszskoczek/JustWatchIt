@@ -13,7 +13,7 @@ public class PhotosControllerService : IPhotosControllerService
 {
     #region FIELDS
 
-    private readonly DatabaseContext _database;
+    private readonly DatabaseContextOld _database;
     private readonly IUserService _userService;
     
     #endregion
@@ -22,7 +22,7 @@ public class PhotosControllerService : IPhotosControllerService
     
     #region CONTRUCTORS
 
-    public PhotosControllerService(DatabaseContext database, IUserService userService)
+    public PhotosControllerService(DatabaseContextOld database, IUserService userService)
     {
         _database = database;
         _userService = userService;

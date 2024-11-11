@@ -1,8 +1,8 @@
 using WatchIt.Database.Model.Media;
 
-namespace WatchIt.Database.Configuration.Media;
+namespace WatchIt.Database.Model.Media;
 
-public class MediumViewCount
+public class MediumViewCount : IViewCountEntity
 {
     #region PROPERTIES
 

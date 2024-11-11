@@ -48,7 +48,7 @@ public class DeleteExpiredRefreshTokensService : BackgroundService
     {
         using (IServiceScope scope = _serviceScopeFactory.CreateScope())
         {
-            DatabaseContext database = scope.ServiceProvider.GetService<DatabaseContext>();
+            DatabaseContextOld database = scope.ServiceProvider.GetService<DatabaseContextOld>();
             
             IEnumerable<AccountRefreshToken> tokens = database.AccountRefreshTokens.Where(x => x.ExpirationDate < DateTime.UtcNow);
             database.AccountRefreshTokens.AttachRange(tokens);

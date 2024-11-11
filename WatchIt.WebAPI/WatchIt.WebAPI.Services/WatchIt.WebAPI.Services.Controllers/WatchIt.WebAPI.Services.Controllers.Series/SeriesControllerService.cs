@@ -11,7 +11,7 @@ public class SeriesControllerService : ISeriesControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContext _database;
+    private readonly DatabaseContextOld _database;
     
     private readonly IUserService _userService;
     
@@ -21,7 +21,7 @@ public class SeriesControllerService : ISeriesControllerService
     
     #region CONSTRUCTORS
 
-    public SeriesControllerService(DatabaseContext database, IUserService userService)
+    public SeriesControllerService(DatabaseContextOld database, IUserService userService)
     {
         _database = database;
         

@@ -25,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\WatchIt.Database\WatchIt.Database.Old\WatchIt.Database.Old.csproj" />
       <ProjectReference Include="..\..\WatchIt.Database\WatchIt.Database\WatchIt.Database.csproj" />
       <ProjectReference Include="..\WatchIt.WebAPI.Controllers\WatchIt.WebAPI.Controllers.csproj" />
       <ProjectReference Include="..\WatchIt.WebAPI.Services\WatchIt.WebAPI.Services.Controllers\WatchIt.WebAPI.Services.Controllers.Persons\WatchIt.WebAPI.Services.Controllers.Persons.csproj" />

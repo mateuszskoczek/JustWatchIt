@@ -8,7 +8,7 @@ public class UserValidator
 {
     #region FIELDS
 
-    protected readonly DatabaseContext _database;
+    protected readonly DatabaseContextOld _database;
     protected readonly ClaimsPrincipal _claimsPrincipal;
     protected readonly List<string> _validationErrors;
 
@@ -27,7 +27,7 @@ public class UserValidator
 
     #region CONSTRUCTORS
 
-    internal UserValidator(DatabaseContext database, ClaimsPrincipal claimsPrincipal)
+    internal UserValidator(DatabaseContextOld database, ClaimsPrincipal claimsPrincipal)
     {
         _database = database;
         _claimsPrincipal = claimsPrincipal;

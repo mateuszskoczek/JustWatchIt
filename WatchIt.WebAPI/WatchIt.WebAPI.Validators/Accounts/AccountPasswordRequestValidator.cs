@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Accounts;
 
 public class AccountPasswordRequestValidator : AbstractValidator<AccountPasswordRequest>
 {
-    public AccountPasswordRequestValidator(DatabaseContext database)
+    public AccountPasswordRequestValidator(DatabaseContextOld database)
     {
         RuleFor(x => x.NewPassword).MinimumLength(8)
                                    .Must(x => x.Any(char.IsUpper)).WithMessage("Password must contain at least one uppercase letter.")

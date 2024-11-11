@@ -78,6 +78,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatchIt.Website.Services.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatchIt.Website.Services.Tokens", "WatchIt.Website\WatchIt.Website.Services\WatchIt.Website.Services.Tokens\WatchIt.Website.Services.Tokens.csproj", "{95A0DC72-B175-3174-5EE2-F1E3473DE428}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WatchIt.Database.Old", "WatchIt.Database\WatchIt.Database.Old\WatchIt.Database.Old.csproj", "{E451C580-3105-47C4-B856-DF86C4A16AF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,6 +202,10 @@ Global
 		{95A0DC72-B175-3174-5EE2-F1E3473DE428}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95A0DC72-B175-3174-5EE2-F1E3473DE428}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95A0DC72-B175-3174-5EE2-F1E3473DE428}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E451C580-3105-47C4-B856-DF86C4A16AF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E451C580-3105-47C4-B856-DF86C4A16AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E451C580-3105-47C4-B856-DF86C4A16AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E451C580-3105-47C4-B856-DF86C4A16AF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F9E593F3-49A5-3F24-D468-932375E9971D} = {0EDF709C-99F4-3EE5-9136-4C92A768A3F8}
@@ -237,5 +243,6 @@ Global
 		{F176F958-3A95-DDBC-8036-2B7E49B3254E} = {AE403159-2725-6961-6E01-1CB0FBD8C1DF}
 		{979B1DA2-CEA0-95C6-3E85-9329D28A41D1} = {AE403159-2725-6961-6E01-1CB0FBD8C1DF}
 		{95A0DC72-B175-3174-5EE2-F1E3473DE428} = {AE403159-2725-6961-6E01-1CB0FBD8C1DF}
+		{E451C580-3105-47C4-B856-DF86C4A16AF7} = {227CC20A-F08E-180E-2EE3-ADA5DB2A8891}
 	EndGlobalSection
 EndGlobal

@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Roles;
 
 public class ActorRolePersonRequestValidator : AbstractValidator<ActorRolePersonRequest>
 {
-    public ActorRolePersonRequestValidator(DatabaseContext database)
+    public ActorRolePersonRequestValidator(DatabaseContextOld database)
     {
         Include(new BaseActorRoleRequestValidator(database));
         RuleFor(x => x.MediaId).NotEmpty()

@@ -9,7 +9,7 @@ using Genre = WatchIt.Database.Model.Common.Genre;
 
 namespace WatchIt.WebAPI.Services.Controllers.Genres;
 
-public class GenresControllerService(DatabaseContext database, IUserService userService) : IGenresControllerService
+public class GenresControllerService(DatabaseContextOld database, IUserService userService) : IGenresControllerService
 {
     #region PUBLIC METHODS
 

@@ -42,7 +42,7 @@ public static class Program
 
         using (IServiceScope scope = app.Services.CreateScope())
         {
-            DatabaseContext dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+            DatabaseContextOld dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContextOld>();
 
             while (!dbContext.Database.CanConnect())
             {
@@ -145,8 +145,8 @@ public static class Program
     
     private static WebApplicationBuilder SetupDatabase(this WebApplicationBuilder builder)
     {
+        builder.Services.AddDbContext<DatabaseContextOld>(x => x.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("Default")), ServiceLifetime.Transient);
         builder.Services.AddDbContext<DatabaseContext>(x => x.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("Default")), ServiceLifetime.Transient);
-        builder.Services.AddDbContext<DatabaseContextNew>(x => x.UseLazyLoadingProxies().UseNpgsql(builder.Configuration.GetConnectionString("Default")), ServiceLifetime.Transient);
         return builder;
     }
 

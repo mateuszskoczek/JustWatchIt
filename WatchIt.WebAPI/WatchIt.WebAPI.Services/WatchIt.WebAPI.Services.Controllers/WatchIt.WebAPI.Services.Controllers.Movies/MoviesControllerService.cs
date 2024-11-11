@@ -11,7 +11,7 @@ public class MoviesControllerService : IMoviesControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContext _database;
+    private readonly DatabaseContextOld _database;
     
     private readonly IUserService _userService;
     
@@ -21,7 +21,7 @@ public class MoviesControllerService : IMoviesControllerService
     
     #region CONSTRUCTORS
 
-    public MoviesControllerService(DatabaseContext database, IUserService userService)
+    public MoviesControllerService(DatabaseContextOld database, IUserService userService)
     {
         _database = database;
         

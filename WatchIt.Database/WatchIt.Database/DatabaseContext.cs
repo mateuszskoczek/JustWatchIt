@@ -11,7 +11,6 @@ using WatchIt.Database.Model.Genres;
 using WatchIt.Database.Model.Media;
 using WatchIt.Database.Model.People;
 using WatchIt.Database.Model.Roles;
-using Person = WatchIt.Database.Model.Person.Person;
 
 namespace WatchIt.Database;
 

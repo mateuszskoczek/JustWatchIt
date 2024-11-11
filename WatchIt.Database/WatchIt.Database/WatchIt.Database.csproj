@@ -25,8 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\WatchIt.Database.Model\WatchIt.Database.Model.Configuration\WatchIt.Database.Model.Configuration.csproj" />
-      <ProjectReference Include="..\WatchIt.Database.Model\WatchIt.Database.Model\WatchIt.Database.Model.csproj" />
+      <Folder Include="Migrations\" />
     </ItemGroup>
 
 </Project>

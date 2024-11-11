@@ -15,8 +15,11 @@ public class Gender
     
     #region NAVIGATION
     
-    // Account
+    // Accounts
     public virtual IEnumerable<Accounts.Account> Accounts { get; set; } = [];
+    
+    // People
+    public virtual IEnumerable<People.Person> People { get; set; } = [];
     
     #endregion
 }

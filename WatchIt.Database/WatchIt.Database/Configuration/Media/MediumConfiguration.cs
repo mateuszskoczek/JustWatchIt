@@ -56,10 +56,26 @@ public class MediumConfiguration : IEntityTypeConfiguration<Medium>
                .UsingEntity<MediumGenre>(
                    x => x.HasOne(y => y.Genre)
                          .WithMany(y => y.MediaRelationObjects)
-                         .HasForeignKey(y => y.GenreId),
+                         .HasForeignKey(y => y.GenreId)
+                         .IsRequired(),
                    x => x.HasOne(y => y.Medium)
                          .WithMany(y => y.GenresRelationshipObjects)
                          .HasForeignKey(y => y.MediumId)
+                         .IsRequired()
+               );
+        
+        // MediumRating
+        builder.HasMany(x => x.RatedBy)
+               .WithMany(x => x.MediaRated)
+               .UsingEntity<MediumRating>(
+                   x => x.HasOne(y => y.Account)
+                         .WithMany(y => y.MediaRatings)
+                         .HasForeignKey(y => y.AccountId)
+                         .IsRequired(),
+                   x => x.HasOne(y => y.Medium)
+                         .WithMany(y => y.Ratings)
+                         .HasForeignKey(y => y.MediumId)
+                         .IsRequired()
                );
 
         #endregion

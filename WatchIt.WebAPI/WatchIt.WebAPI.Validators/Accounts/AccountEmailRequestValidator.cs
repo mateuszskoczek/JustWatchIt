@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Accounts;
 
 public class AccountEmailRequestValidator : AbstractValidator<AccountEmailRequest>
 {
-    public AccountEmailRequestValidator(DatabaseContext database)
+    public AccountEmailRequestValidator(DatabaseContextOld database)
     {
         RuleFor(x => x.NewEmail).EmailAddress()
                                 .CannotBeIn(database.Accounts, x => x.Email)

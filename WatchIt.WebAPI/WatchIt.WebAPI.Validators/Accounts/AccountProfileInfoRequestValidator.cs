@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Accounts;
 
 public class AccountProfileInfoRequestValidator : AbstractValidator<AccountProfileInfoRequest>
 {
-    public AccountProfileInfoRequestValidator(DatabaseContext database)
+    public AccountProfileInfoRequestValidator(DatabaseContextOld database)
     {
         RuleFor(x => x.Description).MaximumLength(1000);
         When(x => x.GenderId.HasValue, () =>

@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Persons;
 
 public class PersonRequestValidator : AbstractValidator<PersonRequest>
 {
-    public PersonRequestValidator(DatabaseContext database)
+    public PersonRequestValidator(DatabaseContextOld database)
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.FullName).MaximumLength(200);

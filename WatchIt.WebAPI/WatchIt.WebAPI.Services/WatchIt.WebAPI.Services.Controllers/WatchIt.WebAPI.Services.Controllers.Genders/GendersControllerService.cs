@@ -12,7 +12,7 @@ public class GendersControllerService : IGendersControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContext _database;
+    private readonly DatabaseContextOld _database;
     private readonly IUserService _userService;
     
     #endregion
@@ -21,7 +21,7 @@ public class GendersControllerService : IGendersControllerService
     
     #region CONSTRUCTORS
 
-    public GendersControllerService(DatabaseContext database, IUserService userService)
+    public GendersControllerService(DatabaseContextOld database, IUserService userService)
     {
         _database = database;
         _userService = userService;

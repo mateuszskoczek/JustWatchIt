@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\WatchIt.Database\WatchIt.Database.Old\WatchIt.Database.Old.csproj" />
       <ProjectReference Include="..\..\WatchIt.Database\WatchIt.Database\WatchIt.Database.csproj" />
     </ItemGroup>
 

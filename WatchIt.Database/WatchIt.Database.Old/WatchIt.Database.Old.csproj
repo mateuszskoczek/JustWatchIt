@@ -6,4 +6,15 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\WatchIt.Database.Model\WatchIt.Database.Model.Configuration\WatchIt.Database.Model.Configuration.csproj" />
+      <ProjectReference Include="..\WatchIt.Database.Model\WatchIt.Database.Model.Seeding\WatchIt.Database.Model.Seeding.csproj" />
+      <ProjectReference Include="..\WatchIt.Database.Model\WatchIt.Database.Model\WatchIt.Database.Model.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+      <PackageReference Include="SimpleToolkit.Extensions" Version="1.7.7" />
+    </ItemGroup>
+
 </Project>

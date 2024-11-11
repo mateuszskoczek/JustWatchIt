@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\WatchIt.Common\WatchIt.Common.Model\WatchIt.Common.Model.csproj" />
       <ProjectReference Include="..\..\..\..\WatchIt.Database\WatchIt.Database.Model\WatchIt.Database.Model\WatchIt.Database.Model.csproj" />
+      <ProjectReference Include="..\..\..\..\WatchIt.Database\WatchIt.Database.Old\WatchIt.Database.Old.csproj" />
       <ProjectReference Include="..\..\..\..\WatchIt.Database\WatchIt.Database\WatchIt.Database.csproj" />
       <ProjectReference Include="..\..\WatchIt.WebAPI.Services.Utility\WatchIt.WebAPI.Services.Utility.Tokens\WatchIt.WebAPI.Services.Utility.Tokens.csproj" />
       <ProjectReference Include="..\..\WatchIt.WebAPI.Services.Utility\WatchIt.WebAPI.Services.Utility.User\WatchIt.WebAPI.Services.Utility.User.csproj" />
@@ -16,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SimpleToolkit.Extensions" Version="1.7.5" />
+      <PackageReference Include="SimpleToolkit.Extensions" Version="1.7.7" />
     </ItemGroup>
 
 </Project>

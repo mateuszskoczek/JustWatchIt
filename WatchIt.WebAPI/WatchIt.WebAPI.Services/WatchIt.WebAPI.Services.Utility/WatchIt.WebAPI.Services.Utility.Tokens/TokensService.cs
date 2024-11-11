@@ -10,7 +10,7 @@ using WatchIt.WebAPI.Services.Utility.Tokens.Exceptions;
 
 namespace WatchIt.WebAPI.Services.Utility.Tokens;
 
-public class TokensService(DatabaseContext database, IConfigurationService configurationService) : ITokensService
+public class TokensService(DatabaseContextOld database, IConfigurationService configurationService) : ITokensService
 {
     #region FIELDS
 

@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Accounts;
 
 public class AccountUsernameRequestValidator : AbstractValidator<AccountUsernameRequest>
 {
-    public AccountUsernameRequestValidator(DatabaseContext database)
+    public AccountUsernameRequestValidator(DatabaseContextOld database)
     {
         RuleFor(x => x.NewUsername).MinimumLength(5)
                                    .MaximumLength(50)

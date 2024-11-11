@@ -26,7 +26,7 @@ namespace WatchIt.WebAPI.Services.Controllers.Accounts;
 
 public class AccountsControllerService(
     ILogger<AccountsControllerService> logger,
-    DatabaseContext database,
+    DatabaseContextOld database,
     ITokensService tokensService,
     IUserService userService
 ) : IAccountsControllerService

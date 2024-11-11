@@ -1,4 +1,6 @@
 using WatchIt.Database.Model.Genders;
+using WatchIt.Database.Model.Media;
+using WatchIt.Database.Model.Roles;
 
 namespace WatchIt.Database.Model.Accounts;
 
@@ -40,6 +42,14 @@ public class Account
     
     // Gender
     public virtual Gender? Gender { get; set; }
+    
+    // Media ratings
+    public virtual IEnumerable<MediumRating> MediaRatings { get; set; } = [];
+    public virtual IEnumerable<Medium> MediaRated { get; set; } = [];
+    
+    // Roles ratings
+    public virtual IEnumerable<RoleRating> RolesRatings { get; set; } = [];
+    public virtual IEnumerable<Role> RolesRated { get; set; } = [];
     
     #endregion
 }

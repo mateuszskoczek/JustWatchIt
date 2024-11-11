@@ -6,7 +6,7 @@ namespace WatchIt.WebAPI.Validators.Roles;
 
 public class BaseActorRoleRequestValidator : AbstractValidator<ActorRoleRequest>
 {
-    public BaseActorRoleRequestValidator(DatabaseContext database)
+    public BaseActorRoleRequestValidator(DatabaseContextOld database)
     {
         RuleFor(x => x.Name).NotEmpty()
                             .MaximumLength(100);

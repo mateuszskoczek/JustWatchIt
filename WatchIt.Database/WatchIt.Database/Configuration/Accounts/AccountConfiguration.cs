@@ -78,10 +78,12 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                .UsingEntity<AccountFollow>(
                    x => x.HasOne<Account>(y => y.Followed)
                          .WithMany(y => y.FollowersRelationshipObjects)
-                         .HasForeignKey(y => y.FollowedId),
+                         .HasForeignKey(y => y.FollowedId)
+                         .IsRequired(),
                    x => x.HasOne<Account>(y => y.Follower)
                          .WithMany(y => y.FollowsRelationshipObjects)
                          .HasForeignKey(y => y.FollowerId)
+                         .IsRequired()
                );
 
         #endregion

@@ -5,7 +5,7 @@ using WatchIt.Database;
 
 namespace WatchIt.WebAPI.Services.Utility.User;
 
-public class UserService(DatabaseContext database, IHttpContextAccessor accessor) : IUserService
+public class UserService(DatabaseContextOld database, IHttpContextAccessor accessor) : IUserService
 {
     #region PUBLIC METHODS
 
