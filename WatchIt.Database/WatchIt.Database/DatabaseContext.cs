@@ -1,17 +1,17 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using SimpleToolkit.Extensions;
-using WatchIt.Database.Model.Account;
-using WatchIt.Database.Model.Common;
-using WatchIt.Database.Model.Configuration.Account;
+using WatchIt.Database.Model.Accounts;
+using WatchIt.Database.Model.Genders;
+using WatchIt.Database.Model.Genres;
 using WatchIt.Database.Model.Media;
-using WatchIt.Database.Model.Person;
-using WatchIt.Database.Model.Rating;
-using WatchIt.Database.Model.ViewCount;
+using WatchIt.Database.Model.People;
+using WatchIt.Database.Model.Roles;
+using Person = WatchIt.Database.Model.Person.Person;
 
 namespace WatchIt.Database;
 
@@ -32,49 +32,38 @@ public class DatabaseContext : DbContext
 
 
     #region PROPERTIES
-
-    // Common
-    public virtual DbSet<Country> Countries { get; set; }
-    public virtual DbSet<Genre> Genres { get; set; }
-    public virtual DbSet<Gender> Genders { get; set; }
-
-    // Account
+    
+    // Media
+    public virtual DbSet<Medium> Media { get; set; }
+    public virtual DbSet<MediumGenre> MediumGenres { get; set; }
+    public virtual DbSet<MediumRating> MediumRatings { get; set; }
+    public virtual DbSet<MediumViewCount> MediumViewCounts { get; set; }
+    public virtual DbSet<MediumPicture> MediumPictures { get; set; }
+    public virtual DbSet<MediumPhoto> MediumPhotos { get; set; }
+    public virtual DbSet<MediumPhotoBackgroundSettings> MediumPhotoBackgroundSettings { get; set; }
+    
+    // People
+    public virtual DbSet<Person> People { get; set; }
+    public virtual DbSet<PersonViewCount> PersonViewCounts { get; set; }
+    public virtual DbSet<PersonPicture> PersonPictures { get; set; }
+    
+    // Roles
+    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<RoleActorType> RoleActorTypes { get; set; }
+    public virtual DbSet<RoleCreatorType> RoleCreatorTypes { get; set; }
+    
+    // Accounts
     public virtual DbSet<Account> Accounts { get; set; }
     public virtual DbSet<AccountFollow> AccountFollows { get; set; }
     public virtual DbSet<AccountProfilePicture> AccountProfilePictures { get; set; }
     public virtual DbSet<AccountRefreshToken> AccountRefreshTokens { get; set; }
-
-    // Media
-    public virtual DbSet<Media> Media { get; set; }
-    public virtual DbSet<MediaMovie> MediaMovies { get; set; }
-    public virtual DbSet<MediaSeries> MediaSeries { get; set; }
-    public virtual DbSet<MediaSeriesSeason> MediaSeriesSeasons { get; set; }
-    public virtual DbSet<MediaSeriesEpisode> MediaSeriesEpisodes { get; set; }
-    public virtual DbSet<MediaPosterImage> MediaPosterImages { get; set; }
-    public virtual DbSet<MediaPhotoImage> MediaPhotoImages { get; set; }
-    public virtual DbSet<MediaPhotoImageBackground> MediaPhotoImageBackgrounds { get; set; }
-    public virtual DbSet<MediaGenre> MediaGenres { get; set; }
-    public virtual DbSet<MediaProductionCountry> MediaProductionCountries { get; set; }
-
-    // Person
-    public virtual DbSet<Person> Persons { get; set; }
-    public virtual DbSet<PersonPhotoImage> PersonPhotoImages { get; set; }
-    public virtual DbSet<PersonActorRole> PersonActorRoles { get; set; }
-    public virtual DbSet<PersonActorRoleType> PersonActorRoleTypes { get; set; }
-    public virtual DbSet<PersonCreatorRole> PersonCreatorRoles { get; set; }
-    public virtual DbSet<PersonCreatorRoleType> PersonCreatorRoleTypes { get; set; }
-
-    // Rating
-    public virtual DbSet<RatingMedia> RatingsMedia { get; set; }
-    public virtual DbSet<RatingPersonActorRole> RatingsPersonActorRole { get; set; }
-    public virtual DbSet<RatingPersonCreatorRole> RatingsPersonCreatorRole { get; set; }
-    public virtual DbSet<RatingMediaSeriesSeason> RatingsMediaSeriesSeason { get; set; }
-    public virtual DbSet<RatingMediaSeriesEpisode> RatingsMediaSeriesEpisode { get; set; }
-
-    // ViewCount
-    public virtual DbSet<ViewCountPerson> ViewCountsPerson { get; set; }
-    public virtual DbSet<ViewCountMedia> ViewCountsMedia { get; set; }
-
+    
+    // Genders
+    public virtual DbSet<Gender> Genders { get; set; }
+    
+    // Genres
+    public virtual DbSet<Genre> Genres { get; set; }
+    
     #endregion
 
 
@@ -88,28 +77,7 @@ public class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetAssembly(typeof(AccountConfiguration)));
-        CreateRootUser(modelBuilder);
-    }
-
-    protected void CreateRootUser(ModelBuilder modelBuilder)
-    {
-        IConfigurationSection configuration = this.GetService<IConfiguration>().GetSection("RootUser");
-
-        string leftSalt = StringExtensions.CreateRandom(20);
-        string rightSalt = StringExtensions.CreateRandom(20);
-        byte[] hash = SHA512.HashData(Encoding.UTF8.GetBytes($"{leftSalt}{configuration["Password"]}{rightSalt}"));
-
-        modelBuilder.Entity<Account>().HasData(new Account
-        {
-            Id = 1,
-            Username = configuration["Username"]!,
-            Email = configuration["Email"]!,
-            Password = hash,
-            LeftSalt = leftSalt,
-            RightSalt = rightSalt,
-            IsAdmin = true,
-        });
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetAssembly(typeof(Account))!);
     }
 
     #endregion
