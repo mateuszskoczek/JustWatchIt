@@ -4,17 +4,32 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using WatchIt.Database;
-using WatchIt.Database.Model.Account;
+using WatchIt.Database.Model.Accounts;
 using WatchIt.WebAPI.Services.Utility.Configuration;
 using WatchIt.WebAPI.Services.Utility.Tokens.Exceptions;
 
 namespace WatchIt.WebAPI.Services.Utility.Tokens;
 
-public class TokensService(DatabaseContextOld database, IConfigurationService configurationService) : ITokensService
+public class TokensService : ITokensService
 {
-    #region FIELDS
+    #region SERVICES
 
-    private readonly Configuration.Model.Tokens _tokensConfig = configurationService.Data.Authentication.Tokens;
+    private readonly Configuration.Model.Tokens _tokensConfig;
+    private readonly DatabaseContext _database;
+    private readonly IConfigurationService _configurationService;
+
+    #endregion
+    
+    
+    
+    #region CONSTRUCORS
+    
+    public TokensService(DatabaseContext database, IConfigurationService configurationService)
+    {
+        _database = database;
+        _configurationService = configurationService;
+        _tokensConfig = configurationService.Data.Authentication.Tokens;
+    }
     
     #endregion
     
@@ -28,21 +43,21 @@ public class TokensService(DatabaseContextOld database, IConfigurationService co
         DateTime expirationDate = DateTime.UtcNow.AddMinutes(expirationMinutes);
         Guid id = Guid.NewGuid();
         
-        database.AccountRefreshTokens.Add(new AccountRefreshToken
+        _database.AccountRefreshTokens.Add(new AccountRefreshToken
         {
             Id = id,
             AccountId = account.Id,
             ExpirationDate = expirationDate,
             IsExtendable = extendable,
         });
-        await database.SaveChangesAsync();
+        await _database.SaveChangesAsync();
 
         return GenerateRefreshJwt(account, id, expirationDate, extendable);
     }
 
     public async Task<string> ExtendRefreshTokenAsync(Account account, Guid id)
     {
-        AccountRefreshToken? token = account.AccountRefreshTokens.FirstOrDefault(x => x.Id == id);
+        AccountRefreshToken? token = account.RefreshTokens.FirstOrDefault(x => x.Id == id);
         switch (token)
         {
             case null: throw new TokenNotFoundException();
@@ -52,7 +67,7 @@ public class TokensService(DatabaseContextOld database, IConfigurationService co
         DateTime expirationDate = DateTime.UtcNow.AddMinutes(_tokensConfig.RefreshToken.ExtendedLifetime);
 
         token.ExpirationDate = expirationDate;
-        await database.SaveChangesAsync();
+        await _database.SaveChangesAsync();
 
         return GenerateRefreshJwt(account, id, expirationDate, true);
     }
@@ -99,8 +114,8 @@ public class TokensService(DatabaseContextOld database, IConfigurationService co
                 new Claim("admin", account.IsAdmin.ToString()),
             }),
             Expires = expirationTime,
-            Issuer = configurationService.Data.Authentication.Issuer,
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configurationService.Data.Authentication.Key)), SecurityAlgorithms.HmacSha512)
+            Issuer = _configurationService.Data.Authentication.Issuer,
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configurationService.Data.Authentication.Key)), SecurityAlgorithms.HmacSha512)
         };
     }
 

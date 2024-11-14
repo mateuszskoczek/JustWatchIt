@@ -1,4 +1,4 @@
-using WatchIt.Common.Model.Photos;
+using WatchIt.Common.Model.Photos.PhotoBackground;
 using WatchIt.WebAPI.Services.Controllers.Common;
 
 namespace WatchIt.WebAPI.Services.Controllers.Photos;
@@ -6,8 +6,7 @@ namespace WatchIt.WebAPI.Services.Controllers.Photos;
 public interface IPhotosControllerService
 {
     Task<RequestResult> GetPhotoRandomBackground();
-    Task<RequestResult> DeletePhoto(Guid photoId);
-
-    Task<RequestResult> PutPhotoBackgroundData(Guid id, PhotoBackgroundDataRequest data);
+    Task<RequestResult> DeletePhoto(Guid id);
+    Task<RequestResult> PutPhotoBackgroundData(Guid id, PhotoBackgroundRequest data);
     Task<RequestResult> DeletePhotoBackgroundData(Guid id);
 }

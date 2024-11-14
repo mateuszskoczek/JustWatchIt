@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WatchIt.Common.Model.Genres;
+using WatchIt.Common.Model.Genres.Genre;
 using WatchIt.Common.Model.Media;
+using WatchIt.Common.Model.Media.Medium;
 using WatchIt.WebAPI.Services.Controllers.Genres;
+using GenreResponse = WatchIt.Common.Model.Genres.Genre.GenreResponse;
 
 namespace WatchIt.WebAPI.Controllers;
 
@@ -18,7 +20,7 @@ public class GenresController(IGenresControllerService genresControllerService) 
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<GenreResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult> GetGenres(GenreQueryParameters query) => await genresControllerService.GetGenres(query);
+    public async Task<ActionResult> GetGenres(GenreResponseQueryParameters query) => await genresControllerService.GetGenres(query);
     
     [HttpGet("{id}")]
     [AllowAnonymous]
@@ -49,9 +51,9 @@ public class GenresController(IGenresControllerService genresControllerService) 
 
     [HttpGet("{id}/media")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(IEnumerable<MediaResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<MediumResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> GetGenreMedia([FromRoute]short id, MediaQueryParameters query) => await genresControllerService.GetGenreMedia(id, query);
+    public async Task<ActionResult> GetGenreMedia([FromRoute]short id, MediumResponseQueryParameters query) => await genresControllerService.GetGenreMedia(id, query);
 
     #endregion
     

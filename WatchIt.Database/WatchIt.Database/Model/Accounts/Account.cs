@@ -29,6 +29,9 @@ public class Account
     // Profile picture
     public virtual AccountProfilePicture? ProfilePicture { get; set; }
     
+    // Background picture
+    public virtual AccountBackgroundPicture? BackgroundPicture { get; set; }
+    
     // Refresh tokens
     public virtual IEnumerable<AccountRefreshToken> RefreshTokens { get; set; } = [];
     

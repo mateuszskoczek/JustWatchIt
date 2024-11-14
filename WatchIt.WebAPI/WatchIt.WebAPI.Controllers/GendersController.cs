@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using WatchIt.Common.Model.Genders;
+using WatchIt.Common.Model.Genders.Gender;
 using WatchIt.WebAPI.Services.Controllers.Genders;
 
 namespace WatchIt.WebAPI.Controllers;
@@ -32,12 +32,10 @@ public class GendersController : ControllerBase
     
     #region METHODS
     
-    #region Main
-    
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<GenderResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult> GetAllGenders(GenderQueryParameters query) => await _gendersControllerService.GetAllGenders(query);
+    public async Task<ActionResult> GetAllGenders(GenderResponseQueryParameters query) => await _gendersControllerService.GetGenders(query);
     
     [HttpGet("{id}")]
     [AllowAnonymous]
@@ -47,7 +45,7 @@ public class GendersController : ControllerBase
     
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [ProducesResponseType(typeof(GenderResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(GenderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
@@ -59,8 +57,6 @@ public class GendersController : ControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
     public async Task<ActionResult> DeleteGender([FromRoute]short id) => await _gendersControllerService.DeleteGender(id);
-    
-    #endregion
     
     #endregion
 }

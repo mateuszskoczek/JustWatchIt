@@ -4,7 +4,7 @@ using WatchIt.Common.Query;
 
 namespace WatchIt.Common.Model.Genres;
 
-public class GenreResponse : Genre, IQueryOrderable<GenreResponse>
+public class GenreResponse : IQueryOrderable<GenreResponse>
 {
     #region PROPERTIES
 
@@ -19,6 +19,9 @@ public class GenreResponse : Genre, IQueryOrderable<GenreResponse>
     [JsonPropertyName("id")]
     public short Id { get; set; }
 
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+    
     #endregion
     
     

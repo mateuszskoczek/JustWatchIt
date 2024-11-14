@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WatchIt.Common.Model.Series;
-using WatchIt.Database;
 using WatchIt.WebAPI.Services.Controllers.Series;
 
 namespace WatchIt.WebAPI.Controllers;

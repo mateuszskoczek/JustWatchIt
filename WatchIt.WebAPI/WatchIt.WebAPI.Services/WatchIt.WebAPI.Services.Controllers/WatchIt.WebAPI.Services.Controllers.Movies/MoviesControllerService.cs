@@ -1,9 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WatchIt.Common.Model.Movies;
+using WatchIt.Common.Model.Media;
+using WatchIt.Common.Model.Media.Medium;
+using WatchIt.Common.Query;
 using WatchIt.Database;
 using WatchIt.Database.Model.Media;
 using WatchIt.WebAPI.Services.Controllers.Common;
 using WatchIt.WebAPI.Services.Utility.User;
+using Media = WatchIt.Database.Model.Media.Media;
 
 namespace WatchIt.WebAPI.Services.Controllers.Movies;
 
@@ -11,7 +14,7 @@ public class MoviesControllerService : IMoviesControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContextOld _database;
+    private readonly DatabaseContext _database;
     
     private readonly IUserService _userService;
     
@@ -21,7 +24,7 @@ public class MoviesControllerService : IMoviesControllerService
     
     #region CONSTRUCTORS
 
-    public MoviesControllerService(DatabaseContextOld database, IUserService userService)
+    public MoviesControllerService(DatabaseContext database, IUserService userService)
     {
         _database = database;
         
@@ -36,27 +39,27 @@ public class MoviesControllerService : IMoviesControllerService
     
     #region Main
 
-    public async Task<RequestResult> GetAllMovies(MovieQueryParameters query)
+    public async Task<RequestResult> GetMovies(MediumMovieResponseQueryParameters query)
     {
-        IEnumerable<MediaMovie> rawData = await _database.MediaMovies.ToListAsync();
-        IEnumerable<MovieResponse> data = rawData.Select(x => new MovieResponse(x));
-        data = query.PrepareData(data);
+        IEnumerable<MediumMovie> rawData = await _database.Media
+                                                          .OfType<MediumMovie>()
+                                                          .ToListAsync();
+        IEnumerable<MediumMovieResponse> data = rawData.Select(x => x.ToMediumMovieResponse())
+                                                       .PrepareData(query);
         return RequestResult.Ok(data);
     }
     
     public async Task<RequestResult> GetMovie(long id)
     {
-        MediaMovie? item = await _database.MediaMovies.FirstOrDefaultAsync(x => x.Id == id);
+        MediumMovie? item = await _database.Media.OfType<MediumMovie>().SingleOrDefaultAsync(x => x.Id == id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
-
-        MovieResponse data = new MovieResponse(item);
-        return RequestResult.Ok(data);
+        return RequestResult.Ok(item.ToMediumMovieResponse());
     }
     
-    public async Task<RequestResult> PostMovie(MovieRequest data)
+    public async Task<RequestResult> PostMovie(MediumMovieRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -64,12 +67,7 @@ public class MoviesControllerService : IMoviesControllerService
             return RequestResult.Forbidden();
         }
 
-        Media mediaItem = data.CreateMedia();
-        await _database.Media.AddAsync(mediaItem);
-        await _database.SaveChangesAsync();
-        MediaMovie mediaMovieItem = data.CreateMediaMovie(mediaItem.Id);
-        await _database.MediaMovies.AddAsync(mediaMovieItem);
-        await _database.SaveChangesAsync();
+        
         
         return RequestResult.Created($"movies/{mediaItem.Id}", new MovieResponse(mediaMovieItem));
     }

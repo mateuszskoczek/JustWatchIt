@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WatchIt.Database.Model.Common;
 using WatchIt.Database.Model.Media;
-using WatchIt.Database.Model.Seeding;
 
 namespace WatchIt.Database.Model.Configuration.Common;
 
@@ -24,8 +23,5 @@ public class GenreConfiguration : IEntityTypeConfiguration<Genre>
         builder.HasMany(x => x.Media)
                .WithMany(x => x.Genres)
                .UsingEntity<MediaGenre>();
-        
-        // Data
-        builder.HasData(DataReader.Read<Genre>());
     }
 }    

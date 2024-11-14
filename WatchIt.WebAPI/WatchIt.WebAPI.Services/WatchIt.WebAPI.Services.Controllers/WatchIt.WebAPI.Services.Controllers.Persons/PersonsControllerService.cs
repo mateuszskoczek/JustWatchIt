@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using WatchIt.Common.Model.Persons;
-using WatchIt.Common.Model.Rating;
+using WatchIt.Common.Model;
+using WatchIt.Common.Model.Generics.Image;
+using WatchIt.Common.Model.Generics.Rating;
+using WatchIt.Common.Model.People;
+using WatchIt.Common.Model.People.Person;
 using WatchIt.Common.Model.Roles;
+using WatchIt.Common.Model.Roles.Role;
+using WatchIt.Common.Query;
 using WatchIt.Database;
-using WatchIt.Database.Model.Person;
-using WatchIt.Database.Model.Rating;
-using WatchIt.Database.Model.ViewCount;
+using WatchIt.Database.Model.People;
+using WatchIt.Database.Model.Roles;
 using WatchIt.WebAPI.Services.Controllers.Common;
 using WatchIt.WebAPI.Services.Utility.User;
-using Person = WatchIt.Database.Model.Person.Person;
 
 namespace WatchIt.WebAPI.Services.Controllers.Persons;
 
@@ -16,7 +19,7 @@ public class PersonsControllerService : IPersonsControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContextOld _database;
+    private readonly DatabaseContext _database;
     private readonly IUserService _userService;
     
     #endregion
@@ -25,7 +28,7 @@ public class PersonsControllerService : IPersonsControllerService
     
     #region CONSTRUCTORS
 
-    public PersonsControllerService(DatabaseContextOld database, IUserService userService)
+    public PersonsControllerService(DatabaseContext database, IUserService userService)
     {
         _database = database;
         _userService = userService;
@@ -39,24 +42,22 @@ public class PersonsControllerService : IPersonsControllerService
     
     #region Main
 
-    public async Task<RequestResult> GetAllPersons(PersonQueryParameters query)
+    public async Task<RequestResult> GetPersons(PersonResponseQueryParameters query)
     {
-        IEnumerable<Person> rawData = await _database.Persons.ToListAsync();
-        IEnumerable<PersonResponse> data = rawData.Select(x => new PersonResponse(x));
-        data = query.PrepareData(data);
+        IEnumerable<Person> rawData = await _database.People.ToListAsync();
+        IEnumerable<PersonResponse> data = rawData.Select(x => x.ToPersonResponse())
+                                                  .PrepareData(query);
         return RequestResult.Ok(data);
     }
     
     public async Task<RequestResult> GetPerson(long id)
     {
-        Person? item = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
+        Person? item = await _database.People.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
-
-        PersonResponse data = new PersonResponse(item);
-        return RequestResult.Ok(data);
+        return RequestResult.Ok(item.ToPersonResponse());
     }
     
     public async Task<RequestResult> PostPerson(PersonRequest data)
@@ -67,11 +68,11 @@ public class PersonsControllerService : IPersonsControllerService
             return RequestResult.Forbidden();
         }
 
-        Person personItem = data.CreatePerson();
-        await _database.Persons.AddAsync(personItem);
+        Person entity = data.ToPersonEntity();
+        await _database.People.AddAsync(entity);
         await _database.SaveChangesAsync();
         
-        return RequestResult.Created($"persons/{personItem.Id}", new PersonResponse(personItem));
+        return RequestResult.Created($"persons/{entity.Id}", entity.ToPersonResponse());
     }
     
     public async Task<RequestResult> PutPerson(long id, PersonRequest data)
@@ -82,14 +83,13 @@ public class PersonsControllerService : IPersonsControllerService
             return RequestResult.Forbidden();
         }
         
-        Person? item = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
+        Person? item = await _database.People.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
         
-        data.UpdatePerson(item);
-        
+        item.UpdateWithPersonRequest(data);
         await _database.SaveChangesAsync();
         
         return RequestResult.Ok();
@@ -103,21 +103,13 @@ public class PersonsControllerService : IPersonsControllerService
             return RequestResult.Forbidden();
         }
         
-        Person? item = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
-        if (item is null)
+        Person? item = await _database.People.FindAsync(id);
+        if (item is not null)
         {
-            return RequestResult.NotFound();
+            _database.People.Attach(item);
+            _database.People.Remove(item);
+            await _database.SaveChangesAsync();
         }
-
-        _database.PersonCreatorRoles.AttachRange(item.PersonCreatorRoles);
-        _database.PersonCreatorRoles.RemoveRange(item.PersonCreatorRoles);
-        _database.PersonActorRoles.AttachRange(item.PersonActorRoles);
-        _database.PersonActorRoles.RemoveRange(item.PersonActorRoles);
-        _database.ViewCountsPerson.AttachRange(item.ViewCountsPerson);
-        _database.ViewCountsPerson.RemoveRange(item.ViewCountsPerson);
-        _database.Persons.Attach(item);
-        _database.Persons.Remove(item);
-        await _database.SaveChangesAsync();
         
         return RequestResult.NoContent();
     }
@@ -134,36 +126,36 @@ public class PersonsControllerService : IPersonsControllerService
         }
         
         DateOnly startDate = DateOnly.FromDateTime(DateTime.Now).AddDays(-days);
-        IEnumerable<Person> rawData = await _database.Persons.OrderByDescending(x => x.ViewCountsPerson.Where(y => y.Date >= startDate)
-                                                                                                       .Sum(y => y.ViewCount))
-                                                             .ThenBy(x => x.Id)
-                                                             .Take(first)
-                                                             .ToListAsync();
+        IEnumerable<Person> rawData = await _database.People.OrderByDescending(x => x.ViewCounts
+                                                                                     .Where(y => y.Date >= startDate)
+                                                                                     .Sum(y => y.ViewCount))
+                                                            .ThenBy(x => x.Id)
+                                                            .Take(first)
+                                                            .ToListAsync();
         
-        IEnumerable<PersonResponse> data = rawData.Select(x => new PersonResponse(x));
-        
+        IEnumerable<PersonResponse> data = rawData.Select(x => x.ToPersonResponse());
         return RequestResult.Ok(data);
     }
     
-    public async Task<RequestResult> PostPersonsView(long personId)
+    public async Task<RequestResult> PostPersonsView(long id)
     {
-        Database.Model.Media.Media? item = await _database.Media.FirstOrDefaultAsync(x => x.Id == personId);
+        Person? item = await _database.People.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
 
         DateOnly dateNow = DateOnly.FromDateTime(DateTime.Now);
-        ViewCountPerson? viewCount = await _database.ViewCountsPerson.FirstOrDefaultAsync(x => x.PersonId == personId && x.Date == dateNow);
+        PersonViewCount? viewCount = await _database.PersonViewCounts.FirstOrDefaultAsync(x => x.PersonId == id && x.Date == dateNow);
         if (viewCount is null)
         {
-            viewCount = new ViewCountPerson
+            viewCount = new PersonViewCount
             {
-                PersonId = personId,
+                PersonId = id,
                 Date = dateNow,
                 ViewCount = 1
             };
-            await _database.ViewCountsPerson.AddAsync(viewCount);
+            await _database.PersonViewCounts.AddAsync(viewCount);
         }
         else
         {
@@ -180,23 +172,15 @@ public class PersonsControllerService : IPersonsControllerService
     
     public async Task<RequestResult> GetPersonPhoto(long id)
     {
-        Person? person = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
-        if (person is null)
-        {
-            return RequestResult.BadRequest();
-        }
-
-        PersonPhotoImage? photo = person.PersonPhoto;
-        if (photo is null)
+        PersonPicture? picture = await _database.PersonPictures.FindAsync(id);
+        if (picture is null)
         {
             return RequestResult.NotFound();
         }
-
-        PersonPhotoResponse data = new PersonPhotoResponse(photo);
-        return RequestResult.Ok(data);
+        return RequestResult.Ok(picture.ToImageResponse());
     }
 
-    public async Task<RequestResult> PutPersonPhoto(long id, PersonPhotoRequest data)
+    public async Task<RequestResult> PutPersonPhoto(long id, ImageRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -204,29 +188,24 @@ public class PersonsControllerService : IPersonsControllerService
             return RequestResult.Forbidden();
         }
         
-        Person? person = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
+        Person? person = await _database.People.FindAsync(id);
         if (person is null)
         {
             return RequestResult.BadRequest();
         }
-
-        if (person.PersonPhoto is null)
+        
+        PersonPicture? picture = person.Picture;
+        if (picture is null)
         {
-            PersonPhotoImage image = data.CreatePersonPhotoImage();
-            await _database.PersonPhotoImages.AddAsync(image);
-            await _database.SaveChangesAsync();
-
-            person.PersonPhotoId = image.Id;
+            picture = data.ToPersonPictureEntity(id);
         }
         else
         {
-            data.UpdatePersonPhotoImage(person.PersonPhoto);
+            picture.UpdateImageEntityWithRequest(data);
         }
         
         await _database.SaveChangesAsync();
-
-        PersonPhotoResponse returnData = new PersonPhotoResponse(person.PersonPhoto);
-        return RequestResult.Ok(returnData);
+        return RequestResult.Ok(picture.ToImageResponse());
     }
 
     public async Task<RequestResult> DeletePersonPhoto(long id)
@@ -237,12 +216,11 @@ public class PersonsControllerService : IPersonsControllerService
             return RequestResult.Forbidden();
         }
         
-        Person? person = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
-
-        if (person?.PersonPhoto != null)
+        PersonPicture? picture = await _database.PersonPictures.FindAsync(id);
+        if (picture is not null)
         {
-            _database.PersonPhotoImages.Attach(person.PersonPhoto);
-            _database.PersonPhotoImages.Remove(person.PersonPhoto);
+            _database.PersonPictures.Attach(picture);
+            _database.PersonPictures.Remove(picture);
             await _database.SaveChangesAsync();
         }
 
@@ -253,74 +231,34 @@ public class PersonsControllerService : IPersonsControllerService
     
     #region Roles
     
-    public async Task<RequestResult> GetPersonAllActorRoles(long personId, ActorRolePersonQueryParameters queryParameters)
+    public async Task<RequestResult> GetPersonAllActorRoles(long id, RoleActorResponseQueryParameters query)
     {
-        Database.Model.Person.Person? person = await _database.Persons.FirstOrDefaultAsync(x => x.Id == personId);
+        Person? person = await _database.People.FindAsync(id);
         if (person is null)
         {
             return RequestResult.NotFound();
         }
             
-        IEnumerable<PersonActorRole> dataRaw = await _database.PersonActorRoles.Where(x => x.PersonId == personId).ToListAsync();
-        IEnumerable<ActorRoleResponse> data = dataRaw.Select(x => new ActorRoleResponse(x));
-        data = queryParameters.PrepareData(data);
+        IEnumerable<RoleActorResponse> data = person.Roles
+                                                    .OfType<RoleActor>()
+                                                    .Select(x => x.ToRoleActorResponse())
+                                                    .PrepareData(query);
         return RequestResult.Ok(data);
     }
     
-    public async Task<RequestResult> PostPersonActorRole(long personId, ActorRolePersonRequest data)
+    public async Task<RequestResult> GetPersonAllCreatorRoles(long id, RoleCreatorResponseQueryParameters query)
     {
-        UserValidator validator = _userService.GetValidator().MustBeAdmin();
-        if (!validator.IsValid)
-        {
-            return RequestResult.Forbidden();
-        }
-        
-        Person? person = await _database.Persons.FirstOrDefaultAsync(x => x.Id == personId);
+        Person? person = await _database.People.FindAsync(id);
         if (person is null)
         {
             return RequestResult.NotFound();
         }
-
-        PersonActorRole item = data.CreateActorRole(personId);
-        await _database.PersonActorRoles.AddAsync(item);
-        await _database.SaveChangesAsync();
-        
-        return RequestResult.Created($"roles/actor/{item.Id}", new ActorRoleResponse(item));
-    }
-    
-    public async Task<RequestResult> GetPersonAllCreatorRoles(long personId, CreatorRolePersonQueryParameters queryParameters)
-    {
-        Person? media = await _database.Persons.FirstOrDefaultAsync(x => x.Id == personId);
-        if (media is null)
-        {
-            return RequestResult.NotFound();
-        }
             
-        IEnumerable<PersonCreatorRole> dataRaw = await _database.PersonCreatorRoles.Where(x => x.PersonId == personId).ToListAsync();
-        IEnumerable<CreatorRoleResponse> data = dataRaw.Select(x => new CreatorRoleResponse(x));
-        data = queryParameters.PrepareData(data);
+        IEnumerable<RoleCreatorResponse> data = person.Roles
+                                                    .OfType<RoleCreator>()
+                                                    .Select(x => x.ToRoleCreatorResponse())
+                                                    .PrepareData(query);
         return RequestResult.Ok(data);
-    }
-    
-    public async Task<RequestResult> PostPersonCreatorRole(long personId, CreatorRolePersonRequest data)
-    {
-        UserValidator validator = _userService.GetValidator().MustBeAdmin();
-        if (!validator.IsValid)
-        {
-            return RequestResult.Forbidden();
-        }
-        
-        Person? media = await _database.Persons.FirstOrDefaultAsync(x => x.Id == personId);
-        if (media is null)
-        {
-            return RequestResult.NotFound();
-        }
-
-        PersonCreatorRole item = data.CreateCreatorRole(personId);
-        await _database.PersonCreatorRoles.AddAsync(item);
-        await _database.SaveChangesAsync();
-        
-        return RequestResult.Created($"roles/creator/{item.Id}", new CreatorRoleResponse(item));
     }
     
     #endregion
@@ -329,34 +267,31 @@ public class PersonsControllerService : IPersonsControllerService
 
     public async Task<RequestResult> GetPersonGlobalRating(long id)
     {
-        Person? item = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
+        Person? item = await _database.People.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
-        
-        RatingResponse ratingResponse = RatingResponseBuilder.Initialize()
-                                                             .Add(item.PersonActorRoles.SelectMany(x => x.RatingPersonActorRole), x => x.Rating)
-                                                             .Add(item.PersonCreatorRoles.SelectMany(x => x.RatingPersonCreatorRole), x => x.Rating)
-                                                             .Build();
-        
-        return RequestResult.Ok(ratingResponse);
+
+        RatingOverallResponse response = item.Roles
+                                             .SelectMany(x => x.Ratings)
+                                             .GetRatingResponseFromRatingEntitiesCollection();
+        return RequestResult.Ok(response);
     }
 
     public async Task<RequestResult> GetPersonUserRating(long id, long userId)
     {
-        Person? item = await _database.Persons.FirstOrDefaultAsync(x => x.Id == id);
+        Person? item = await _database.People.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
 
-        RatingResponse ratingResponse = RatingResponseBuilder.Initialize()
-                                                             .Add(item.PersonActorRoles.SelectMany(x => x.RatingPersonActorRole).Where(x => x.AccountId == userId), x => x.Rating)
-                                                             .Add(item.PersonCreatorRoles.SelectMany(x => x.RatingPersonCreatorRole).Where(x => x.AccountId == userId), x => x.Rating)
-                                                             .Build();
-        
-        return RequestResult.Ok(ratingResponse);
+        RatingUserOverallResponse response = item.Roles
+                                                 .SelectMany(x => x.Ratings
+                                                                   .Where(y => y.AccountId == userId))
+                                                 .GetRatingUserOverallResponseFromRatingEntitiesCollection();
+        return RequestResult.Ok(response);
     }
 
     #endregion

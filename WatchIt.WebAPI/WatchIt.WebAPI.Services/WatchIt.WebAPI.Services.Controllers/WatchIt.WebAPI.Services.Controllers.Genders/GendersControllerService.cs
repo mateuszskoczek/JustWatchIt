@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WatchIt.Common.Model.Genders;
+using WatchIt.Common.Model.Genders.Gender;
+using WatchIt.Common.Query;
 using WatchIt.Database;
-using WatchIt.Database.Model.Common;
+using WatchIt.Database.Model.Genders;
 using WatchIt.WebAPI.Services.Controllers.Common;
 using WatchIt.WebAPI.Services.Utility.User;
-using Gender = WatchIt.Database.Model.Common.Gender;
+using GenderResponse = WatchIt.Common.Model.Genders.Gender.GenderResponse;
 
 namespace WatchIt.WebAPI.Services.Controllers.Genders;
 
@@ -12,7 +14,7 @@ public class GendersControllerService : IGendersControllerService
 {
     #region SERVICES
 
-    private readonly DatabaseContextOld _database;
+    private readonly DatabaseContext _database;
     private readonly IUserService _userService;
     
     #endregion
@@ -21,7 +23,7 @@ public class GendersControllerService : IGendersControllerService
     
     #region CONSTRUCTORS
 
-    public GendersControllerService(DatabaseContextOld database, IUserService userService)
+    public GendersControllerService(DatabaseContext database, IUserService userService)
     {
         _database = database;
         _userService = userService;
@@ -33,26 +35,21 @@ public class GendersControllerService : IGendersControllerService
 
     #region PUBLIC METHODS
     
-    #region Main
-    
-    public async Task<RequestResult> GetAllGenders(GenderQueryParameters query)
+    public async Task<RequestResult> GetGenders(GenderResponseQueryParameters query)
     {
         IEnumerable<Gender> rawData = await _database.Genders.ToListAsync();
-        IEnumerable<GenderResponse> data = rawData.Select(x => new GenderResponse(x));
-        data = query.PrepareData(data);
+        IEnumerable<GenderResponse> data = rawData.Select(x => x.ToGenderResponse()).PrepareData(query);
         return RequestResult.Ok(data);
     }
 
     public async Task<RequestResult> GetGender(short id)
     {
-        Gender? item = await _database.Genders.FirstOrDefaultAsync(x => x.Id == id);
+        Gender? item = await _database.Genders.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
-
-        GenderResponse data = new GenderResponse(item);
-        return RequestResult.Ok(data);
+        return RequestResult.Ok(item.ToGenderResponse());
     }
 
     public async Task<RequestResult> PostGender(GenderRequest data)
@@ -62,12 +59,12 @@ public class GendersControllerService : IGendersControllerService
         {
             return RequestResult.Forbidden();
         }
-
-        Gender item = data.CreateGender();
-        await _database.Genders.AddAsync(item);
+        
+        Gender entity = data.ToGenderEntity();
+        await _database.Genders.AddAsync(entity);
         await _database.SaveChangesAsync();
         
-        return RequestResult.Created($"genres/{item.Id}", new GenderResponse(item));
+        return RequestResult.Ok(entity.ToGenderResponse());
     }
     
     public async Task<RequestResult> DeleteGender(short id)
@@ -78,20 +75,16 @@ public class GendersControllerService : IGendersControllerService
             return RequestResult.Forbidden();
         }
         
-        Gender? item = await _database.Genders.FirstOrDefaultAsync(x => x.Id == id);
-        if (item is null)
+        Gender? item = await _database.Genders.FindAsync(id);
+        if (item is not null)
         {
-            return RequestResult.NoContent();
+            _database.Genders.Attach(item);
+            _database.Genders.Remove(item);
+            await _database.SaveChangesAsync();
         }
-
-        _database.Genders.Attach(item);
-        _database.Genders.Remove(item);
-        await _database.SaveChangesAsync();
         
         return RequestResult.NoContent();
     }
-    
-    #endregion
     
     #endregion
 }

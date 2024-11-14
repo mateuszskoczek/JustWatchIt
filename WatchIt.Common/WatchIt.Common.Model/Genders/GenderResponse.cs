@@ -4,7 +4,7 @@ using WatchIt.Common.Query;
 
 namespace WatchIt.Common.Model.Genders;
 
-public class GenderResponse : Gender, IQueryOrderable<GenderResponse>
+public class GenderResponse : IQueryOrderable<GenderResponse>
 {
     #region PROPERTIES
 
@@ -18,6 +18,9 @@ public class GenderResponse : Gender, IQueryOrderable<GenderResponse>
     [JsonPropertyName("id")]
     public required short? Id { get; set; }
 
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+    
     #endregion
     
     

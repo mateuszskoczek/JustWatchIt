@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WatchIt.Database.Model.Common;
 using WatchIt.Database.Model.Media;
-using WatchIt.Database.Model.Seeding;
 
 namespace WatchIt.Database.Model.Configuration.Common;
 
@@ -28,8 +27,5 @@ public class CountryConfiguration : IEntityTypeConfiguration<Country>
         builder.HasMany(x => x.MediaProduction)
                .WithMany(x => x.ProductionCountries)
                .UsingEntity<MediaProductionCountry>();
-        
-        // Data
-        builder.HasData(DataReader.Read<Country>());
     }
 }

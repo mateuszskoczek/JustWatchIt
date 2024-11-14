@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using WatchIt.Common.Model.Media;
-using WatchIt.Database;
 using WatchIt.WebAPI.Validators.Photos;
 
 namespace WatchIt.WebAPI.Validators.Media;

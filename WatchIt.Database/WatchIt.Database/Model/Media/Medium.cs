@@ -1,4 +1,5 @@
 using WatchIt.Database.Model.Genres;
+using WatchIt.Database.Model.Photos;
 using WatchIt.Database.Model.Roles;
 
 namespace WatchIt.Database.Model.Media;
@@ -29,7 +30,7 @@ public abstract class Medium
     public virtual MediumPicture Picture { get; set; } = default!;
     
     // Photos
-    public virtual IEnumerable<MediumPhoto> Photos { get; set; } = [];
+    public virtual IEnumerable<Photo> Photos { get; set; } = [];
     
     // View counts
     public virtual IEnumerable<MediumViewCount> ViewCounts { get; set; } = [];

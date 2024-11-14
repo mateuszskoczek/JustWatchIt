@@ -90,6 +90,24 @@ namespace WatchIt.Database.Migrations
                     b.ToTable("Accounts", "accounts");
                 });
 
+            modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountBackgroundPicture", b =>
+                {
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("BackgroundId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AccountId");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("BackgroundId");
+
+                    b.ToTable("AccountBackgroundPictures", "accounts");
+                });
+
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountFollow", b =>
                 {
                     b.Property<long>("FollowerId")
@@ -255,66 +273,6 @@ namespace WatchIt.Database.Migrations
                     b.HasIndex("MediumId");
 
                     b.ToTable("MediumGenres", "media");
-                });
-
-            modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPhoto", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasMaxLength(-1)
-                        .HasColumnType("bytea");
-
-                    b.Property<long>("MediumId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTimeOffset>("UploadDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.HasIndex("MediumId");
-
-                    b.ToTable("MediumPhotos", "media");
-                });
-
-            modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPhotoBackgroundSettings", b =>
-                {
-                    b.Property<Guid>("PhotoId")
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("FirstGradientColor")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<bool>("IsUniversal")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<byte[]>("SecondGradientColor")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.HasKey("PhotoId");
-
-                    b.HasIndex("PhotoId")
-                        .IsUnique();
-
-                    b.ToTable("MediumPhotoBackgroundSettings", "media");
                 });
 
             modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPicture", b =>
@@ -495,6 +453,73 @@ namespace WatchIt.Database.Migrations
                     b.ToTable("PersonViewCounts", "people");
                 });
 
+            modelBuilder.Entity("WatchIt.Database.Model.Photos.Photo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("Image")
+                        .IsRequired()
+                        .HasMaxLength(-1)
+                        .HasColumnType("bytea");
+
+                    b.Property<long>("MediumId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("UploadDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("MediumId");
+
+                    b.ToTable("Photos", "photos");
+                });
+
+            modelBuilder.Entity("WatchIt.Database.Model.Photos.PhotoBackground", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("FirstGradientColor")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<bool>("IsUniversal")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("SecondGradientColor")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("PhotoId")
+                        .IsUnique();
+
+                    b.ToTable("PhotoBackground", "photos");
+                });
+
             modelBuilder.Entity("WatchIt.Database.Model.Roles.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -660,6 +685,25 @@ namespace WatchIt.Database.Migrations
                     b.Navigation("Gender");
                 });
 
+            modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountBackgroundPicture", b =>
+                {
+                    b.HasOne("WatchIt.Database.Model.Accounts.Account", "Account")
+                        .WithOne("BackgroundPicture")
+                        .HasForeignKey("WatchIt.Database.Model.Accounts.AccountBackgroundPicture", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WatchIt.Database.Model.Photos.PhotoBackground", "Background")
+                        .WithMany("BackgroundUsages")
+                        .HasForeignKey("BackgroundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Background");
+                });
+
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.AccountFollow", b =>
                 {
                     b.HasOne("WatchIt.Database.Model.Accounts.Account", "Followed")
@@ -718,28 +762,6 @@ namespace WatchIt.Database.Migrations
                     b.Navigation("Genre");
 
                     b.Navigation("Medium");
-                });
-
-            modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPhoto", b =>
-                {
-                    b.HasOne("WatchIt.Database.Model.Media.Medium", "Medium")
-                        .WithMany("Photos")
-                        .HasForeignKey("MediumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Medium");
-                });
-
-            modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPhotoBackgroundSettings", b =>
-                {
-                    b.HasOne("WatchIt.Database.Model.Media.MediumPhoto", "Photo")
-                        .WithOne("BackgroundSettings")
-                        .HasForeignKey("WatchIt.Database.Model.Media.MediumPhotoBackgroundSettings", "PhotoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Photo");
                 });
 
             modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPicture", b =>
@@ -814,6 +836,28 @@ namespace WatchIt.Database.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("WatchIt.Database.Model.Photos.Photo", b =>
+                {
+                    b.HasOne("WatchIt.Database.Model.Media.Medium", "Medium")
+                        .WithMany("Photos")
+                        .HasForeignKey("MediumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Medium");
+                });
+
+            modelBuilder.Entity("WatchIt.Database.Model.Photos.PhotoBackground", b =>
+                {
+                    b.HasOne("WatchIt.Database.Model.Photos.Photo", "Photo")
+                        .WithOne("BackgroundSettings")
+                        .HasForeignKey("WatchIt.Database.Model.Photos.PhotoBackground", "PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Photo");
+                });
+
             modelBuilder.Entity("WatchIt.Database.Model.Roles.Role", b =>
                 {
                     b.HasOne("WatchIt.Database.Model.Media.Medium", "Medium")
@@ -876,6 +920,8 @@ namespace WatchIt.Database.Migrations
 
             modelBuilder.Entity("WatchIt.Database.Model.Accounts.Account", b =>
                 {
+                    b.Navigation("BackgroundPicture");
+
                     b.Navigation("FollowersRelationshipObjects");
 
                     b.Navigation("FollowsRelationshipObjects");
@@ -917,11 +963,6 @@ namespace WatchIt.Database.Migrations
                     b.Navigation("ViewCounts");
                 });
 
-            modelBuilder.Entity("WatchIt.Database.Model.Media.MediumPhoto", b =>
-                {
-                    b.Navigation("BackgroundSettings");
-                });
-
             modelBuilder.Entity("WatchIt.Database.Model.People.Person", b =>
                 {
                     b.Navigation("Picture");
@@ -929,6 +970,16 @@ namespace WatchIt.Database.Migrations
                     b.Navigation("Roles");
 
                     b.Navigation("ViewCounts");
+                });
+
+            modelBuilder.Entity("WatchIt.Database.Model.Photos.Photo", b =>
+                {
+                    b.Navigation("BackgroundSettings");
+                });
+
+            modelBuilder.Entity("WatchIt.Database.Model.Photos.PhotoBackground", b =>
+                {
+                    b.Navigation("BackgroundUsages");
                 });
 
             modelBuilder.Entity("WatchIt.Database.Model.Roles.Role", b =>

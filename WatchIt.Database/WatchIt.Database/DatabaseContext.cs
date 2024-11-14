@@ -10,6 +10,7 @@ using WatchIt.Database.Model.Genders;
 using WatchIt.Database.Model.Genres;
 using WatchIt.Database.Model.Media;
 using WatchIt.Database.Model.People;
+using WatchIt.Database.Model.Photos;
 using WatchIt.Database.Model.Roles;
 
 namespace WatchIt.Database;
@@ -38,8 +39,6 @@ public class DatabaseContext : DbContext
     public virtual DbSet<MediumRating> MediumRatings { get; set; }
     public virtual DbSet<MediumViewCount> MediumViewCounts { get; set; }
     public virtual DbSet<MediumPicture> MediumPictures { get; set; }
-    public virtual DbSet<MediumPhoto> MediumPhotos { get; set; }
-    public virtual DbSet<MediumPhotoBackgroundSettings> MediumPhotoBackgroundSettings { get; set; }
     
     // People
     public virtual DbSet<Person> People { get; set; }
@@ -55,7 +54,12 @@ public class DatabaseContext : DbContext
     public virtual DbSet<Account> Accounts { get; set; }
     public virtual DbSet<AccountFollow> AccountFollows { get; set; }
     public virtual DbSet<AccountProfilePicture> AccountProfilePictures { get; set; }
+    public virtual DbSet<AccountBackgroundPicture> AccountBackgroundPictures { get; set; }
     public virtual DbSet<AccountRefreshToken> AccountRefreshTokens { get; set; }
+    
+    // Photos
+    public virtual DbSet<Photo> Photos { get; set; }
+    public virtual DbSet<PhotoBackground> PhotoBackgrounds { get; set; }
     
     // Genders
     public virtual DbSet<Gender> Genders { get; set; }

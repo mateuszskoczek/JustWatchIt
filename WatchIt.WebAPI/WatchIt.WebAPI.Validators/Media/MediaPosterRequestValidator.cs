@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using WatchIt.Common.Model.Media;
-using WatchIt.Database;
 
 namespace WatchIt.WebAPI.Validators.Media;
 

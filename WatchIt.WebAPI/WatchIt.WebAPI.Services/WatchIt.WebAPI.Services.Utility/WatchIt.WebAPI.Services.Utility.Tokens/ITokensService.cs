@@ -1,4 +1,4 @@
-﻿using WatchIt.Database.Model.Account;
+﻿using WatchIt.Database.Model.Accounts;
 
 namespace WatchIt.WebAPI.Services.Utility.Tokens;
 

@@ -1,91 +1,108 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WatchIt.Common.Model.Genres;
+using WatchIt.Common.Model.Genres.Genre;
 using WatchIt.Common.Model.Media;
+using WatchIt.Common.Model.Media.Medium;
+using WatchIt.Common.Query;
 using WatchIt.Database;
-using WatchIt.Database.Model.Media;
+using WatchIt.Database.Model.Genres;
 using WatchIt.WebAPI.Services.Controllers.Common;
 using WatchIt.WebAPI.Services.Utility.User;
-using Genre = WatchIt.Database.Model.Common.Genre;
+using GenreResponse = WatchIt.Common.Model.Genres.Genre.GenreResponse;
 
 namespace WatchIt.WebAPI.Services.Controllers.Genres;
 
-public class GenresControllerService(DatabaseContextOld database, IUserService userService) : IGenresControllerService
+public class GenresControllerService : IGenresControllerService
 {
+    #region SERVICES
+
+    private readonly DatabaseContext _database;
+    private readonly IUserService _userService;
+
+    #endregion
+    
+
+    
+    #region CONSTRUCTORS
+    
+    public GenresControllerService(DatabaseContext database, IUserService userService)
+    {
+        _database = database;
+        _userService = userService;
+    }
+    
+    #endregion
+
+    
+    
     #region PUBLIC METHODS
 
     #region Main
     
-    public async Task<RequestResult> GetGenres(GenreQueryParameters query)
+    public async Task<RequestResult> GetGenres(GenreResponseQueryParameters query)
     {
-        IEnumerable<GenreResponse> data = await database.Genres.Select(x => new GenreResponse(x)).ToListAsync();
-        data = query.PrepareData(data);
+        IEnumerable<Genre> rawData = await _database.Genres.ToListAsync();
+        IEnumerable<GenreResponse> data = rawData.Select(x => x.ToGenreResponse()).PrepareData(query);
         return RequestResult.Ok(data);
     }
 
     public async Task<RequestResult> GetGenre(short id)
     {
-        Genre? item = await database.Genres.FirstOrDefaultAsync(x => x.Id == id);
+        Genre? item = await _database.Genres.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
-
-        GenreResponse data = new GenreResponse(item);
-        return RequestResult.Ok(data);
+        return RequestResult.Ok(item.ToGenreResponse());
     }
 
     public async Task<RequestResult> PostGenre(GenreRequest data)
     {
-        UserValidator validator = userService.GetValidator().MustBeAdmin();
+        UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
         {
             return RequestResult.Forbidden();
         }
-
-        Genre item = data.CreateGenre();
-        await database.Genres.AddAsync(item);
-        await database.SaveChangesAsync();
         
-        return RequestResult.Created($"genres/{item.Id}", new GenreResponse(item));
+        Genre entity = data.ToGenreEntity();
+        await _database.Genres.AddAsync(entity);
+        await _database.SaveChangesAsync();
+        
+        return RequestResult.Ok(entity.ToGenreResponse());
     }
 
     public async Task<RequestResult> DeleteGenre(short id)
     {
-        UserValidator validator = userService.GetValidator().MustBeAdmin();
+        UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
         {
             return RequestResult.Forbidden();
         }
         
-        Genre? item = await database.Genres.FirstOrDefaultAsync(x => x.Id == id);
-        if (item is null)
+        Genre? item = await _database.Genres.FindAsync(id);
+        if (item is not null)
         {
-            return RequestResult.NotFound();
+            _database.Genres.Attach(item);
+            _database.Genres.Remove(item);
+            await _database.SaveChangesAsync();
         }
 
-        database.MediaGenres.AttachRange(item.MediaGenres);
-        database.MediaGenres.RemoveRange(item.MediaGenres);
-        database.Genres.Attach(item);
-        database.Genres.Remove(item);
-        await database.SaveChangesAsync();
-        
-        return RequestResult.Ok();
+        return RequestResult.NoContent();
     }
 
     #endregion
 
     #region Media
 
-    public async Task<RequestResult> GetGenreMedia(short id, MediaQueryParameters query)
+    public async Task<RequestResult> GetGenreMedia(short id, MediumResponseQueryParameters query)
     {
-        Genre? genre = await database.Genres.FirstOrDefaultAsync(x => x.Id == id);
+        Genre? genre = await _database.Genres.FindAsync(id);
         if (genre is null)
         {
             return RequestResult.NotFound();
         }
         
-        IEnumerable<MediaResponse> data = genre.Media.Select(x => new MediaResponse(x, database.MediaMovies.Any(y => y.Id == x.Id) ? MediaType.Movie : MediaType.Series));
-        data = query.PrepareData(data);
+        IEnumerable<MediumResponse> data = genre.Media.Select(x => x.ToMediumResponse()).PrepareData(query);
         return RequestResult.Ok(data);
     }
 

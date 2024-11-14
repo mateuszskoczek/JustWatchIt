@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SimpleToolkit.Extensions;
 using WatchIt.Common.Model.Photos;
+using WatchIt.Common.Model.Photos.Photo;
+using WatchIt.Common.Model.Photos.PhotoBackground;
 using WatchIt.Database;
 using WatchIt.Database.Model.Media;
+using WatchIt.Database.Model.Photos;
 using WatchIt.WebAPI.Services.Controllers.Common;
 using WatchIt.WebAPI.Services.Utility.User;
 
@@ -13,7 +15,7 @@ public class PhotosControllerService : IPhotosControllerService
 {
     #region FIELDS
 
-    private readonly DatabaseContextOld _database;
+    private readonly DatabaseContext _database;
     private readonly IUserService _userService;
     
     #endregion
@@ -22,7 +24,7 @@ public class PhotosControllerService : IPhotosControllerService
     
     #region CONTRUCTORS
 
-    public PhotosControllerService(DatabaseContextOld database, IUserService userService)
+    public PhotosControllerService(DatabaseContext database, IUserService userService)
     {
         _database = database;
         _userService = userService;
@@ -38,17 +40,20 @@ public class PhotosControllerService : IPhotosControllerService
     
     public Task<RequestResult> GetPhotoRandomBackground()
     {
-        MediaPhotoImage? image = _database.MediaPhotoImages.Where(x => x.MediaPhotoImageBackground != null && x.MediaPhotoImageBackground.IsUniversalBackground).Random();
+        PhotoResponse? image = _database.PhotoBackgrounds
+                                        .Where(x => x.IsUniversal)
+                                        .Random()?
+                                        .Photo
+                                        .ToPhotoResponse();
+                                        
         if (image is null)
         {
             return Task.FromResult<RequestResult>(RequestResult.NotFound());
         }
-
-        PhotoResponse data = new PhotoResponse(image);
-        return Task.FromResult<RequestResult>(RequestResult.Ok(data));
+        return Task.FromResult<RequestResult>(RequestResult.Ok(image));
     }
     
-    public async Task<RequestResult> DeletePhoto(Guid photoId)
+    public async Task<RequestResult> DeletePhoto(Guid id)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -56,31 +61,22 @@ public class PhotosControllerService : IPhotosControllerService
             return RequestResult.Forbidden();
         }
         
-        MediaPhotoImage? item = await _database.MediaPhotoImages.FirstOrDefaultAsync(x => x.Id == photoId);
-        if (item is null)
+        Photo? item = await _database.Photos.FindAsync(id);
+        if (item is not null)
         {
-            return RequestResult.NotFound();
-        }
-
-        if (item.MediaPhotoImageBackground is not null)
-        {
-            _database.MediaPhotoImageBackgrounds.Attach(item.MediaPhotoImageBackground);
-            _database.MediaPhotoImageBackgrounds.Remove(item.MediaPhotoImageBackground);
+            _database.Photos.Attach(item);
+            _database.Photos.Remove(item);
             await _database.SaveChangesAsync();
         }
-
-        _database.MediaPhotoImages.Attach(item);
-        _database.MediaPhotoImages.Remove(item);
-        await _database.SaveChangesAsync();
         
-        return RequestResult.Ok();
+        return RequestResult.NoContent();
     }
     
     #endregion
     
     #region Background data
 
-    public async Task<RequestResult> PutPhotoBackgroundData(Guid id, PhotoBackgroundDataRequest data)
+    public async Task<RequestResult> PutPhotoBackgroundData(Guid id, PhotoBackgroundRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -88,21 +84,21 @@ public class PhotosControllerService : IPhotosControllerService
             return RequestResult.Forbidden();
         }
         
-        MediaPhotoImage? image = await _database.MediaPhotoImages.FirstOrDefaultAsync(x => x.Id == id);
-        if (image is null)
+        Photo? photo = await _database.Photos.FindAsync(id);
+        if (photo is null)
         {
             return RequestResult.NotFound();
         }
 
-        MediaPhotoImageBackground? imageBackground = image.MediaPhotoImageBackground;
-        if (imageBackground is null)
+        PhotoBackground? background = photo.Background;
+        if (background is null)
         {
-            imageBackground = data.CreateMediaPhotoImageBackground(id);
-            await _database.MediaPhotoImageBackgrounds.AddAsync(imageBackground);
+            background = data.ToPhotoBackgroundEntity(id);
+            await _database.PhotoBackgrounds.AddAsync(background);
         }
         else
         {
-            data.UpdateMediaPhotoImageBackground(imageBackground);
+            background.UpdateWithRequest(data);
         }
         await _database.SaveChangesAsync();
         
@@ -117,17 +113,11 @@ public class PhotosControllerService : IPhotosControllerService
             return RequestResult.Forbidden();
         }
         
-        MediaPhotoImage? image = await _database.MediaPhotoImages.FirstOrDefaultAsync(x => x.Id == id);
-        if (image is null)
+        PhotoBackground? background = await _database.PhotoBackgrounds.SingleOrDefaultAsync(x => x.PhotoId == id);
+        if (background is not null)
         {
-            return RequestResult.NotFound();
-        }
-        
-        MediaPhotoImageBackground? imageBackground = image.MediaPhotoImageBackground;
-        if (imageBackground is not null)
-        {
-            _database.MediaPhotoImageBackgrounds.Attach(imageBackground);
-            _database.MediaPhotoImageBackgrounds.Remove(imageBackground);
+            _database.PhotoBackgrounds.Attach(background);
+            _database.PhotoBackgrounds.Remove(background);
             await _database.SaveChangesAsync();
         }
         
