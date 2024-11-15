@@ -22,7 +22,7 @@ public class RolesControllerService : IRolesControllerService
     
     #region CONSTRUCTORS
 
-    public RolesControllerService(DatabaseContextOld database, IUserService userService)
+    public RolesControllerService(DatabaseContext database, IUserService userService)
     {
         _database = database;
         _userService = userService;

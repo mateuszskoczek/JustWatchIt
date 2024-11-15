@@ -1,15 +1,14 @@
-﻿using WatchIt.Common.Model.Movies;
+using WatchIt.Common.Model.Media.Medium;
 using WatchIt.WebAPI.Services.Controllers.Common;
 
 namespace WatchIt.WebAPI.Services.Controllers.Movies;
 
 public interface IMoviesControllerService
 {
-    Task<RequestResult> GetAllMovies(MovieQueryParameters query);
+    Task<RequestResult> GetMovies(MediumMovieResponseQueryParameters query);
     Task<RequestResult> GetMovie(long id);
-    Task<RequestResult> PostMovie(MovieRequest data);
-    Task<RequestResult> PutMovie(long id, MovieRequest data);
+    Task<RequestResult> PostMovie(MediumMovieRequest data);
+    Task<RequestResult> PutMovie(long id, MediumMovieRequest data);
     Task<RequestResult> DeleteMovie(long id);
-
     Task<RequestResult> GetMoviesViewRank(int first, int days);
 }

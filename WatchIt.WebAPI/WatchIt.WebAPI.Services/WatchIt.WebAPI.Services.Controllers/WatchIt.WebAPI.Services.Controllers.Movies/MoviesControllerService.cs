@@ -44,19 +44,21 @@ public class MoviesControllerService : IMoviesControllerService
         IEnumerable<MediumMovie> rawData = await _database.Media
                                                           .OfType<MediumMovie>()
                                                           .ToListAsync();
-        IEnumerable<MediumMovieResponse> data = rawData.Select(x => x.ToMediumMovieResponse())
+        IEnumerable<MediumMovieResponse> data = rawData.Select(x => x.ToResponse())
                                                        .PrepareData(query);
         return RequestResult.Ok(data);
     }
     
     public async Task<RequestResult> GetMovie(long id)
     {
-        MediumMovie? item = await _database.Media.OfType<MediumMovie>().SingleOrDefaultAsync(x => x.Id == id);
+        MediumMovie? item = await _database.Media
+                                           .OfType<MediumMovie>()
+                                           .SingleOrDefaultAsync(x => x.Id == id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
-        return RequestResult.Ok(item.ToMediumMovieResponse());
+        return RequestResult.Ok(item.ToResponse());
     }
     
     public async Task<RequestResult> PostMovie(MediumMovieRequest data)
@@ -67,12 +69,14 @@ public class MoviesControllerService : IMoviesControllerService
             return RequestResult.Forbidden();
         }
 
+        MediumMovie entity = data.ToEntity();
+        await _database.Media.AddAsync(entity);
+        await _database.SaveChangesAsync();
         
-        
-        return RequestResult.Created($"movies/{mediaItem.Id}", new MovieResponse(mediaMovieItem));
+        return RequestResult.Created($"movies/{entity.Id}", entity.ToResponse());
     }
     
-    public async Task<RequestResult> PutMovie(long id, MovieRequest data)
+    public async Task<RequestResult> PutMovie(long id, MediumMovieRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -80,14 +84,15 @@ public class MoviesControllerService : IMoviesControllerService
             return RequestResult.Forbidden();
         }
         
-        MediaMovie? item = await _database.MediaMovies.FirstOrDefaultAsync(x => x.Id == id);
+        MediumMovie? item = await _database.Media
+                                           .OfType<MediumMovie>()
+                                           .SingleOrDefaultAsync(x => x.Id == id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
         
-        data.UpdateMediaMovie(item);
-        data.UpdateMedia(item.Media);
+        item.UpdateWithRequest(data);
         await _database.SaveChangesAsync();
         
         return RequestResult.Ok();
@@ -101,32 +106,14 @@ public class MoviesControllerService : IMoviesControllerService
             return RequestResult.Forbidden();
         }
         
-        MediaMovie? item = await _database.MediaMovies.FirstOrDefaultAsync(x => x.Id == id);
+        Medium? item = await _database.Media.FindAsync(id);
         if (item is null)
         {
             return RequestResult.NotFound();
         }
 
-        _database.MediaMovies.Attach(item);
-        _database.MediaMovies.Remove(item);
-        _database.MediaPosterImages.Attach(item.Media.MediaPosterImage!);
-        _database.MediaPosterImages.Remove(item.Media.MediaPosterImage!);
-        _database.MediaPhotoImages.AttachRange(item.Media.MediaPhotoImages);
-        _database.MediaPhotoImages.RemoveRange(item.Media.MediaPhotoImages);
-        _database.MediaGenres.AttachRange(item.Media.MediaGenres);
-        _database.MediaGenres.RemoveRange(item.Media.MediaGenres);
-        _database.MediaProductionCountries.AttachRange(item.Media.MediaProductionCountries);
-        _database.MediaProductionCountries.RemoveRange(item.Media.MediaProductionCountries);
-        _database.PersonActorRoles.AttachRange(item.Media.PersonActorRoles);
-        _database.PersonActorRoles.RemoveRange(item.Media.PersonActorRoles);
-        _database.PersonCreatorRoles.AttachRange(item.Media.PersonCreatorRoles);
-        _database.PersonCreatorRoles.RemoveRange(item.Media.PersonCreatorRoles);
-        _database.RatingsMedia.AttachRange(item.Media.RatingMedia);
-        _database.RatingsMedia.RemoveRange(item.Media.RatingMedia);
-        _database.ViewCountsMedia.AttachRange(item.Media.ViewCountsMedia);
-        _database.ViewCountsMedia.RemoveRange(item.Media.ViewCountsMedia);
-        _database.Media.Attach(item.Media);
-        _database.Media.Remove(item.Media);
+        _database.Media.Attach(item);
+        _database.Media.Remove(item);
         await _database.SaveChangesAsync();
         
         return RequestResult.NoContent();
@@ -144,14 +131,15 @@ public class MoviesControllerService : IMoviesControllerService
         }
         
         DateOnly startDate = DateOnly.FromDateTime(DateTime.Now).AddDays(-days);
-        IEnumerable<MediaMovie> rawData = await _database.MediaMovies.OrderByDescending(x => x.Media.ViewCountsMedia.Where(y => y.Date >= startDate)
-                                                                                                                    .Sum(y => y.ViewCount))
-                                                                     .ThenBy(x => x.Id)
-                                                                     .Take(first)
-                                                                     .ToListAsync();
-        
-        IEnumerable<MovieResponse> data = rawData.Select(x => new MovieResponse(x));
-        
+        IEnumerable<MediumMovie> rawData = await _database.Media
+                                                          .OfType<MediumMovie>()
+                                                          .OrderByDescending(x => x.ViewCounts
+                                                                                   .Where(y => y.Date >= startDate)
+                                                                                   .Sum(y => y.ViewCount))
+                                                          .ThenBy(x => x.Id)
+                                                          .Take(first)
+                                                          .ToListAsync();
+        IEnumerable<MediumMovieResponse> data = rawData.Select(x => x.ToResponse());
         return RequestResult.Ok(data);
     }
 

@@ -342,7 +342,7 @@ public class AccountsControllerService : IAccountsControllerService
 
         IEnumerable<MediumMovieUserRatedResponse> response = account.MediaRated
                                                                     .OfType<MediumMovie>()
-                                                                    .Select(x => x.ToMediumMovieUserRatedResponse(id))
+                                                                    .Select(x => x.ToResponse(id))
                                                                     .PrepareData(query);
         return RequestResult.Ok(response);
     }
@@ -358,7 +358,7 @@ public class AccountsControllerService : IAccountsControllerService
 
         IEnumerable<MediumSeriesUserRatedResponse> response = account.MediaRated
                                                                      .OfType<MediumSeries>()
-                                                                     .Select(x => x.ToMediumSeriesUserRatedResponse(id))
+                                                                     .Select(x => x.ToResponse(id))
                                                                      .PrepareData(query);
         return RequestResult.Ok(response);
     }

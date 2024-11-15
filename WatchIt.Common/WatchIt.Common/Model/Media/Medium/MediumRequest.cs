@@ -8,7 +8,7 @@ public abstract class MediumRequest
     public string? OriginalTitle { get; set; }
     public string? Description { get; set; }
     public DateOnly? ReleaseDate { get; set; }
-    public short? Length { get; set; }
+    public TimeSpan? Duration { get; set; }
     
     #endregion
 }

@@ -7,18 +7,39 @@ using MediumType = WatchIt.Database.Model.Media.MediumType;
 
 namespace WatchIt.Common.Model.Media;
 
-public static class MediumMapperExtensions
+public static class MediaMappers
 {
     #region PUBLIC METHODS
     
     #region Medium
 
-    public static Database.Model.Media.Medium ToMediumEntity(this MediumResponse response)
+    public static MediumMovie ToEntity(this MediumMovieRequest request)
     {
-        
+        MediumMovie medium = new MediumMovie();
+        medium.UpdateWithRequest(request);
+        return medium;
     }
 
-    public static MediumResponse ToMediumResponse(this Database.Model.Media.Medium entity)
+    public static void UpdateWithRequest(this MediumMovie entity, MediumMovieRequest request)
+    {
+        entity.SetMediumEntityProperties(request);
+        entity.Budget = request.Budget;
+    }
+    
+    public static MediumSeries ToEntity(this MediumSeriesRequest request)
+    {
+        MediumSeries medium = new MediumSeries();
+        medium.UpdateWithRequest(request);
+        return medium;
+    }
+    
+    public static void UpdateWithRequest(this MediumSeries entity, MediumSeriesRequest request)
+    {
+        entity.SetMediumEntityProperties(request);
+        entity.HasEnded = request.HasEnded;
+    }
+
+    public static MediumResponse ToResponse(this Database.Model.Media.Medium entity)
     { 
         MediumResponse response = new MediumResponse();
         response.SetMediumResponseProperties(entity);
@@ -26,7 +47,7 @@ public static class MediumMapperExtensions
         return response;
     }
 
-    public static MediumMovieResponse ToMediumMovieResponse(this MediumMovie entity)
+    public static MediumMovieResponse ToResponse(this MediumMovie entity)
     { 
         MediumMovieResponse response = new MediumMovieResponse();
         response.SetMediumResponseProperties(entity);
@@ -34,7 +55,7 @@ public static class MediumMapperExtensions
         return response;
     }
     
-    public static MediumSeriesResponse ToMediumSeriesResponse(this MediumSeries entity)
+    public static MediumSeriesResponse ToResponse(this MediumSeries entity)
     { 
         MediumSeriesResponse response = new MediumSeriesResponse();
         response.SetMediumResponseProperties(entity);
@@ -42,7 +63,7 @@ public static class MediumMapperExtensions
         return response;
     }
     
-    public static MediumUserRatedResponse ToMediumUserRatedResponse(this Database.Model.Media.Medium entity, long accountId)
+    public static MediumUserRatedResponse ToResponse(this Database.Model.Media.Medium entity, long accountId)
     { 
         MediumUserRatedResponse response = new MediumUserRatedResponse();
         response.SetMediumResponseProperties(entity);
@@ -50,7 +71,7 @@ public static class MediumMapperExtensions
         return response;
     }
 
-    public static MediumMovieUserRatedResponse ToMediumMovieUserRatedResponse(this MediumMovie entity, long accountId)
+    public static MediumMovieUserRatedResponse ToResponse(this MediumMovie entity, long accountId)
     { 
         MediumMovieUserRatedResponse response = new MediumMovieUserRatedResponse();
         response.SetMediumResponseProperties(entity);
@@ -59,7 +80,7 @@ public static class MediumMapperExtensions
         return response;
     }
     
-    public static MediumSeriesUserRatedResponse ToMediumSeriesUserRatedResponse(this MediumSeries entity, long accountId)
+    public static MediumSeriesUserRatedResponse ToResponse(this MediumSeries entity, long accountId)
     { 
         MediumSeriesUserRatedResponse response = new MediumSeriesUserRatedResponse();
         response.SetMediumResponseProperties(entity);
@@ -72,7 +93,7 @@ public static class MediumMapperExtensions
     
     #region MediumPicture
 
-    public static Database.Model.Media.MediumPicture ToAccountProfilePictureEntity(this ImageRequest request, long mediumId) => new Database.Model.Media.MediumPicture
+    public static MediumPicture ToEntity(this ImageRequest request, long mediumId) => new Database.Model.Media.MediumPicture
     {
         MediumId = mediumId,
         Image = request.Image,
@@ -81,11 +102,30 @@ public static class MediumMapperExtensions
 
     #endregion
     
+    #region MediumGenre
+
+    public static MediumGenre CreateMediumGenre(long id, short genreId) => new MediumGenre
+    {
+        MediumId = id,
+        GenreId = genreId,
+    };
+    
+    #endregion
+    
     #endregion
     
     
     
     #region PRIVATE METHODS
+
+    private static void SetMediumEntityProperties(this Database.Model.Media.Medium entity, MediumRequest request)
+    {
+        entity.Title = request.Title;
+        entity.OriginalTitle = request.OriginalTitle;
+        entity.Description = request.Description;
+        entity.Duration = request.Duration;
+        entity.ReleaseDate = request.ReleaseDate;
+    }
 
     private static void SetMediumResponseProperties(this BaseMediumResponse response, Database.Model.Media.Medium entity)
     {
@@ -95,7 +135,7 @@ public static class MediumMapperExtensions
         response.Description = entity.Description;
         response.ReleaseDate = entity.ReleaseDate;
         response.Duration = entity.Duration;
-        response.Genres = entity.Genres.Select(x => x.ToGenreResponse());
+        response.Genres = entity.Genres.Select(x => x.ToResponse());
         response.Rating = entity.Ratings.GetRatingResponseFromRatingEntitiesCollection();
     }
     

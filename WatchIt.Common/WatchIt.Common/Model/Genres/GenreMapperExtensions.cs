@@ -6,13 +6,13 @@ public static class GenreMapperExtensions
 {
     #region PUBLIC METHODS
 
-    public static Genre.GenreResponse ToGenreResponse(this Database.Model.Genres.Genre entity) => new Genre.GenreResponse
+    public static Genre.GenreResponse ToResponse(this Database.Model.Genres.Genre entity) => new Genre.GenreResponse
     {
         Id = entity.Id,
         Name = entity.Name,
     };
 
-    public static Database.Model.Genres.Genre ToGenreEntity(this GenreRequest request) => new Database.Model.Genres.Genre
+    public static Database.Model.Genres.Genre ToEntity(this GenreRequest request) => new Database.Model.Genres.Genre
     {
         Name = request.Name,
     };

@@ -41,8 +41,10 @@ public class GenresControllerService : IGenresControllerService
     
     public async Task<RequestResult> GetGenres(GenreResponseQueryParameters query)
     {
-        IEnumerable<Genre> rawData = await _database.Genres.ToListAsync();
-        IEnumerable<GenreResponse> data = rawData.Select(x => x.ToGenreResponse()).PrepareData(query);
+        IEnumerable<Genre> rawData = await _database.Genres
+                                                    .ToListAsync();
+        IEnumerable<GenreResponse> data = rawData.Select(x => x.ToResponse())
+                                                 .PrepareData(query);
         return RequestResult.Ok(data);
     }
 
@@ -53,7 +55,7 @@ public class GenresControllerService : IGenresControllerService
         {
             return RequestResult.NotFound();
         }
-        return RequestResult.Ok(item.ToGenreResponse());
+        return RequestResult.Ok(item.ToResponse());
     }
 
     public async Task<RequestResult> PostGenre(GenreRequest data)
@@ -64,11 +66,11 @@ public class GenresControllerService : IGenresControllerService
             return RequestResult.Forbidden();
         }
         
-        Genre entity = data.ToGenreEntity();
+        Genre entity = data.ToEntity();
         await _database.Genres.AddAsync(entity);
         await _database.SaveChangesAsync();
         
-        return RequestResult.Ok(entity.ToGenreResponse());
+        return RequestResult.Ok(entity.ToResponse());
     }
 
     public async Task<RequestResult> DeleteGenre(short id)
@@ -102,7 +104,9 @@ public class GenresControllerService : IGenresControllerService
             return RequestResult.NotFound();
         }
         
-        IEnumerable<MediumResponse> data = genre.Media.Select(x => x.ToMediumResponse()).PrepareData(query);
+        IEnumerable<MediumResponse> data = genre.Media
+                                                .Select(x => x.ToResponse())
+                                                .PrepareData(query);
         return RequestResult.Ok(data);
     }
 

@@ -22,7 +22,7 @@ public class PhotoBackgroundConfiguration : IEntityTypeConfiguration<PhotoBackgr
         
         // Photo
         builder.HasOne(x => x.Photo)
-               .WithOne(x => x.BackgroundSettings)
+               .WithOne(x => x.Background)
                .HasForeignKey<PhotoBackground>(x => x.PhotoId)
                .IsRequired();
         builder.HasIndex(x => x.PhotoId)
