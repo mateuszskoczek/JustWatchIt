@@ -104,12 +104,37 @@ public static class MediaMappers
     
     #region MediumGenre
 
-    public static MediumGenre CreateMediumGenre(long id, short genreId) => new MediumGenre
+    public static MediumGenre CreateMediumGenre(long mediumId, short genreId) => new MediumGenre
     {
-        MediumId = id,
+        MediumId = mediumId,
         GenreId = genreId,
     };
     
+    #endregion
+    
+    #region MediumRating
+
+    public static MediumRating ToEntity(this RatingRequest request, long mediumId, long userId)
+    {
+        MediumRating entity = new MediumRating
+        {
+            MediumId = mediumId,
+            AccountId = userId
+        };
+        entity.UpdateWithRequest(request);
+        return entity;
+    }
+    
+    #endregion
+
+    #region MediumViewCount
+
+    public static MediumViewCount CreateMediumViewCount(long mediumId) => new MediumViewCount
+    {
+        MediumId = mediumId,
+        ViewCount = 1,
+    };
+
     #endregion
     
     #endregion
@@ -136,7 +161,7 @@ public static class MediaMappers
         response.ReleaseDate = entity.ReleaseDate;
         response.Duration = entity.Duration;
         response.Genres = entity.Genres.Select(x => x.ToResponse());
-        response.Rating = entity.Ratings.GetRatingResponseFromRatingEntitiesCollection();
+        response.Rating = entity.Ratings.ToOverallResponse();
     }
     
     private static void SetMediumMovieResponseProperties(this MediumMovieResponse response, MediumMovie entity)
@@ -151,7 +176,7 @@ public static class MediaMappers
 
     private static void SetMediumUserRatedResponseProperties(this IMediumUserRatedResponse response, Database.Model.Media.Medium entity, long accountId)
     {
-        response.RatingUser = entity.Ratings.SingleOrDefault(x => x.AccountId == accountId)?.GetRatingResponseFromRatingEntity();
+        response.RatingUser = entity.Ratings.SingleOrDefault(x => x.AccountId == accountId)?.ToUserResponse();
     }
     
     #endregion

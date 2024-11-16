@@ -1,12 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimpleToolkit.Extensions;
+using WatchIt.Common.Model.Generics.Image;
 using WatchIt.Common.Model.Generics.Rating;
 using WatchIt.Common.Model.Genres;
 using WatchIt.Common.Model.Media;
 using WatchIt.Common.Model.Media.Medium;
+using WatchIt.Common.Model.Photos;
+using WatchIt.Common.Model.Photos.Photo;
+using WatchIt.Common.Model.Roles;
+using WatchIt.Common.Model.Roles.Role;
 using WatchIt.Common.Query;
 using WatchIt.Database;
 using WatchIt.Database.Model.Genres;
 using WatchIt.Database.Model.Media;
+using WatchIt.Database.Model.Photos;
+using WatchIt.Database.Model.Roles;
 using WatchIt.WebAPI.Services.Controllers.Common;
 using WatchIt.WebAPI.Services.Utility.User;
 using GenreResponse = WatchIt.Common.Model.Genres.Genre.GenreResponse;
@@ -134,7 +142,7 @@ public class MediaControllerService : IMediaControllerService
         {
             return RequestResult.NotFound();
         }
-        return RequestResult.Ok(entity.Ratings.GetRatingResponseFromRatingEntitiesCollection());
+        return RequestResult.Ok(entity.Ratings.ToOverallResponse());
     }
 
     public async Task<RequestResult> GetMediumRatingByUser(long id, long userId)
@@ -144,52 +152,48 @@ public class MediaControllerService : IMediaControllerService
         {
             return RequestResult.NotFound();
         }
-        return RequestResult.Ok(entity.Ratings.);
+        MediumRating? ratingEntity = entity.Ratings.SingleOrDefault(x => x.AccountId == userId);
+        if (ratingEntity is null)
+        {
+            return RequestResult.NotFound();
+        }
+        return RequestResult.Ok(ratingEntity.ToUserResponse());
     }
     
-    public async Task<RequestResult> PutMediaRating(long mediaId, RatingRequest data)
+    public async Task<RequestResult> PutMediaRating(long id, RatingRequest data)
     {
-        Database.Model.Media.Media? item = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (item is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
         
         long userId = _userService.GetUserId();
-
-        RatingMedia? rating = item.RatingMedia.FirstOrDefault(x => x.AccountId == userId);
-        if (rating is not null)
+        MediumRating? ratingEntity = entity.Ratings.SingleOrDefault(x => x.AccountId == userId);
+        if (ratingEntity is not null)
         {
-            rating.Rating = data.Rating;
+            ratingEntity.UpdateWithRequest(data);
         }
         else
         {
-            rating = new RatingMedia
-            {
-                AccountId = userId,
-                MediaId = mediaId,
-                Rating = data.Rating
-            };
-            await _database.RatingsMedia.AddAsync(rating);
+            ratingEntity = data.ToEntity(id, userId);
+            await _database.MediumRatings.AddAsync(ratingEntity);
         }
         await _database.SaveChangesAsync();
         
         return RequestResult.Ok();
     }
 
-    public async Task<RequestResult> DeleteMediaRating(long mediaId)
+    public async Task<RequestResult> DeleteMediaRating(long id)
     { 
         long userId = _userService.GetUserId();
-        
-        RatingMedia? item = await _database.RatingsMedia.FirstOrDefaultAsync(x => x.MediaId == mediaId && x.AccountId == userId);
-        if (item is null)
+        MediumRating? entity = await _database.MediumRatings.SingleOrDefaultAsync(x => x.MediumId == id && x.AccountId == userId);
+        if (entity is not null)
         {
-            return RequestResult.Ok();
+            _database.MediumRatings.Attach(entity);
+            _database.MediumRatings.Remove(entity);
+            await _database.SaveChangesAsync();
         }
-        
-        _database.RatingsMedia.Attach(item);
-        _database.RatingsMedia.Remove(item);
-        await _database.SaveChangesAsync();
         
         return RequestResult.Ok();
     }
@@ -198,25 +202,19 @@ public class MediaControllerService : IMediaControllerService
 
     #region View count
 
-    public async Task<RequestResult> PostMediaView(long mediaId)
+    public async Task<RequestResult> PostMediaView(long id)
     {
-        Database.Model.Media.Media? item = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (item is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
 
-        DateOnly dateNow = DateOnly.FromDateTime(DateTime.Now);
-        ViewCountMedia? viewCount = await _database.ViewCountsMedia.FirstOrDefaultAsync(x => x.MediaId == mediaId && x.Date == dateNow);
+        MediumViewCount? viewCount = entity.ViewCounts.SingleOrDefault(x => x.Date == DateOnly.FromDateTime(DateTime.UtcNow));
         if (viewCount is null)
         {
-            viewCount = new ViewCountMedia
-            {
-                MediaId = mediaId,
-                Date = dateNow,
-                ViewCount = 1
-            };
-            await _database.ViewCountsMedia.AddAsync(viewCount);
+            viewCount = MediaMappers.CreateMediumViewCount(id);
+            await _database.MediumViewCounts.AddAsync(viewCount);
         }
         else
         {
@@ -231,25 +229,24 @@ public class MediaControllerService : IMediaControllerService
     
     #region Poster
     
-    public async Task<RequestResult> GetMediaPoster(long mediaId)
+    public async Task<RequestResult> GetMediaPoster(long id)
     {
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (media is null)
-        {
-            return RequestResult.BadRequest();
-        }
-
-        MediaPosterImage? poster = media.MediaPosterImage;
-        if (poster is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
 
-        MediaPosterResponse data = new MediaPosterResponse(poster);
-        return RequestResult.Ok(data);
+        MediumPicture? poster = entity.Picture;
+        if (poster is null)
+        {
+            return RequestResult.NotFound();
+        }
+        
+        return RequestResult.Ok(poster.ToResponse());
     }
 
-    public async Task<RequestResult> PutMediaPoster(long mediaId, MediaPosterRequest data)
+    public async Task<RequestResult> PutMediaPoster(long id, ImageRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -257,32 +254,28 @@ public class MediaControllerService : IMediaControllerService
             return RequestResult.Forbidden();
         }
         
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (media is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
-            return RequestResult.BadRequest();
+            return RequestResult.NotFound();
         }
 
-        if (media.MediaPosterImage is null)
+        MediumPicture? poster = entity.Picture;
+        if (poster is null)
         {
-            MediaPosterImage image = data.CreateMediaPosterImage();
-            await _database.MediaPosterImages.AddAsync(image);
-            await _database.SaveChangesAsync();
-
-            media.MediaPosterImageId = image.Id;
+            poster = data.ToEntity(id);
+            await _database.MediumPictures.AddAsync(poster);
         }
         else
         {
-            data.UpdateMediaPosterImage(media.MediaPosterImage);
+            poster.UpdateWithRequest(data);
         }
-        
         await _database.SaveChangesAsync();
-
-        MediaPosterResponse returnData = new MediaPosterResponse(media.MediaPosterImage!);
-        return RequestResult.Ok(returnData);
+        
+        return RequestResult.Ok(poster.ToResponse());
     }
 
-    public async Task<RequestResult> DeleteMediaPoster(long mediaId)
+    public async Task<RequestResult> DeleteMediaPoster(long id)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -290,12 +283,11 @@ public class MediaControllerService : IMediaControllerService
             return RequestResult.Forbidden();
         }
         
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-
-        if (media?.MediaPosterImage != null)
+        MediumPicture? entity = await _database.MediumPictures.FindAsync(id);
+        if (entity is not null)
         {
-            _database.MediaPosterImages.Attach(media.MediaPosterImage);
-            _database.MediaPosterImages.Remove(media.MediaPosterImage);
+            _database.MediumPictures.Attach(entity);
+            _database.MediumPictures.Remove(entity);
             await _database.SaveChangesAsync();
         }
 
@@ -306,33 +298,40 @@ public class MediaControllerService : IMediaControllerService
 
     #region Photos
 
-    public async Task<RequestResult> GetMediaPhotos(long mediaId, PhotoQueryParameters queryParameters)
+    public async Task<RequestResult> GetMediaPhotos(long id, PhotoResponseQueryParameters query)
     {
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (media is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
-            
-        IEnumerable<MediaPhotoImage> imagesRaw = await _database.MediaPhotoImages.Where(x => x.MediaId == mediaId).ToListAsync();
-        IEnumerable<PhotoResponse> images = imagesRaw.Select(x => new PhotoResponse(x));
-        images = queryParameters.PrepareData(images);
-        return RequestResult.Ok(images);
+
+        IEnumerable<PhotoResponse> photos = entity.Photos
+                                                  .Select(x => x.ToResponse())
+                                                  .PrepareData(query);
+        return RequestResult.Ok(photos);
     }
     
-    public Task<RequestResult> GetMediaPhotoRandomBackground(long mediaId)
+    public async Task<RequestResult> GetMediaPhotoRandomBackground(long id)
     {
-        MediaPhotoImage? image = _database.MediaPhotoImages.Where(x => x.MediaId == mediaId && x.MediaPhotoImageBackground != null).Random();
-        if (image is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
-            return Task.FromResult<RequestResult>(RequestResult.NotFound());
+            return RequestResult.NotFound();
         }
 
-        PhotoResponse data = new PhotoResponse(image);
-        return Task.FromResult<RequestResult>(RequestResult.Ok(data));
+        Photo? photo = entity.Photos
+                             .Where(x => x.Background is not null)
+                             .Random();
+        if (photo is null)
+        {
+            return RequestResult.NotFound();
+        }
+        
+        return RequestResult.Ok(photo.ToResponse());
     }
 
-    public async Task<RequestResult> PostMediaPhoto(long mediaId, MediaPhotoRequest data)
+    public async Task<RequestResult> PostMediaPhoto(long id, PhotoRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -340,45 +339,46 @@ public class MediaControllerService : IMediaControllerService
             return RequestResult.Forbidden();
         }
         
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (media is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
 
-        MediaPhotoImage item = data.CreateMediaPhotoImage(mediaId);
-        await _database.MediaPhotoImages.AddAsync(item);
+        Photo photo = data.ToEntity();
+        await _database.Photos.AddAsync(photo);
         await _database.SaveChangesAsync();
 
-        MediaPhotoImageBackground? background = data.CreateMediaPhotoImageBackground(item.Id);
+        PhotoBackground? background = data.BackgroundData?.ToEntity(photo.Id);
         if (background is not null)
         {
-            await _database.MediaPhotoImageBackgrounds.AddAsync(background);
+            await _database.PhotoBackgrounds.AddAsync(background);
             await _database.SaveChangesAsync();
         }
         
-        return RequestResult.Created($"photos/{item.Id}", new PhotoResponse(item));
+        return RequestResult.Created($"photos/{photo.Id}", photo.ToResponse());
     }
     
     #endregion
     
     #region Roles
     
-    public async Task<RequestResult> GetMediaAllActorRoles(long mediaId, ActorRoleMediaQueryParameters queryParameters)
+    public async Task<RequestResult> GetMediaAllActorRoles(long id, RoleActorResponseQueryParameters query)
     {
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (media is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
-            
-        IEnumerable<PersonActorRole> dataRaw = await _database.PersonActorRoles.Where(x => x.MediaId == mediaId).ToListAsync();
-        IEnumerable<ActorRoleResponse> data = dataRaw.Select(x => new ActorRoleResponse(x));
-        data = queryParameters.PrepareData(data);
-        return RequestResult.Ok(data);
+
+        IEnumerable<RoleActorResponse> roles = entity.Roles
+                                                     .OfType<RoleActor>()
+                                                     .Select(x => x.ToResponse())
+                                                     .PrepareData(query);
+        return RequestResult.Ok(roles);
     }
     
-    public async Task<RequestResult> PostMediaActorRole(long mediaId, ActorRoleMediaRequest data)
+    public async Task<RequestResult> PostMediaActorRole(long id, RoleActorRequest data)
     {
         UserValidator validator = _userService.GetValidator().MustBeAdmin();
         if (!validator.IsValid)
@@ -386,13 +386,14 @@ public class MediaControllerService : IMediaControllerService
             return RequestResult.Forbidden();
         }
         
-        Database.Model.Media.Media? media = await _database.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
-        if (media is null)
+        Medium? entity = await _database.Media.FindAsync(id);
+        if (entity is null)
         {
             return RequestResult.NotFound();
         }
 
-        PersonActorRole item = data.CreateActorRole(mediaId);
+        data.
+        var role = data.CreateActorRole(mediaId);
         await _database.PersonActorRoles.AddAsync(item);
         await _database.SaveChangesAsync();
         

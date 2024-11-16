@@ -4,11 +4,16 @@ using WatchIt.Database.Model.Media;
 
 namespace WatchIt.Common.Model.Generics.Rating;
 
-public static class RatingMapperExtensions
+public static class RatingMappers
 {
     #region PUBLIC METHODS
-
-    public static RatingOverallResponse GetRatingResponseFromRatingEntitiesCollection(this IEnumerable<IRatingEntity> entities)
+    
+    public static void UpdateWithRequest(this IRatingEntity entity, RatingRequest ratingRequest)
+    {
+        entity.Rating = ratingRequest.Rating;
+    }
+    
+    public static RatingOverallResponse ToOverallResponse(this IEnumerable<IRatingEntity> entities)
     {
         long sum = entities.Sum(x => x.Rating);
         long count = entities.Count();
@@ -19,13 +24,13 @@ public static class RatingMapperExtensions
         };
     }
 
-    public static RatingUserResponse GetRatingResponseFromRatingEntity(this IRatingEntity entity) => new RatingUserResponse
+    public static RatingUserResponse ToUserResponse(this IRatingEntity entity) => new RatingUserResponse
     {
         Date = entity.Date,
         Rating = entity.Rating,
     };
 
-    public static RatingUserOverallResponse GetRatingUserOverallResponseFromRatingEntitiesCollection(this IEnumerable<IRatingEntity> entities)
+    public static RatingUserOverallResponse ToUserOverallResponse(this IEnumerable<IRatingEntity> entities)
     {
         long sum = entities.Sum(x => x.Rating);
         long count = entities.Count();

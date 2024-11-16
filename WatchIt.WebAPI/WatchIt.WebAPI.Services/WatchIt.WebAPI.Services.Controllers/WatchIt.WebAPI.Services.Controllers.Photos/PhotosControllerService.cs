@@ -44,7 +44,7 @@ public class PhotosControllerService : IPhotosControllerService
                                         .Where(x => x.IsUniversal)
                                         .Random()?
                                         .Photo
-                                        .ToPhotoResponse();
+                                        .ToResponse();
                                         
         if (image is null)
         {
@@ -93,7 +93,7 @@ public class PhotosControllerService : IPhotosControllerService
         PhotoBackground? background = photo.Background;
         if (background is null)
         {
-            background = data.ToPhotoBackgroundEntity(id);
+            background = data.ToEntity(id);
             await _database.PhotoBackgrounds.AddAsync(background);
         }
         else

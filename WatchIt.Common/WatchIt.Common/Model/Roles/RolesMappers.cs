@@ -2,13 +2,15 @@ using WatchIt.Common.Model.Roles.Role;
 
 namespace WatchIt.Common.Model.Roles;
 
-public static class RoleMapperExtensions
+public static class RolesMappers
 {
     #region PUBLIC METHODS
 
     #region Roles
+    
+    
 
-    public static RoleActorResponse ToRoleActorResponse(this Database.Model.Roles.RoleActor entity)
+    public static RoleActorResponse ToResponse(this Database.Model.Roles.RoleActor entity)
     { 
         RoleActorResponse response = new RoleActorResponse();
         response.SetRoleResponseProperties(entity);
@@ -17,7 +19,7 @@ public static class RoleMapperExtensions
         return response;
     }
     
-    public static RoleCreatorResponse ToRoleCreatorResponse(this Database.Model.Roles.RoleCreator entity)
+    public static RoleCreatorResponse ToResponse(this Database.Model.Roles.RoleCreator entity)
     { 
         RoleCreatorResponse response = new RoleCreatorResponse();
         response.SetRoleResponseProperties(entity);

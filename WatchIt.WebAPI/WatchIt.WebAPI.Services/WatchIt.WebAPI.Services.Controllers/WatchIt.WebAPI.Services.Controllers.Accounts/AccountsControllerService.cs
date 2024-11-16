@@ -153,7 +153,7 @@ public class AccountsControllerService : IAccountsControllerService
         {
             return RequestResult.NotFound();
         }
-        return RequestResult.Ok(picture.ToImageResponse());
+        return RequestResult.Ok(picture.ToResponse());
     }
     
     public async Task<RequestResult> PutAccountProfilePicture(ImageRequest data)
@@ -168,11 +168,11 @@ public class AccountsControllerService : IAccountsControllerService
         }
         else
         {
-            picture.UpdateImageEntityWithRequest(data);
+            picture.UpdateWithRequest(data);
         }
         await _database.SaveChangesAsync();
 
-        return RequestResult.Ok(picture.ToImageResponse());
+        return RequestResult.Ok(picture.ToResponse());
     }
 
     public async Task<RequestResult> DeleteAccountProfilePicture()
@@ -202,7 +202,7 @@ public class AccountsControllerService : IAccountsControllerService
             return RequestResult.NotFound();
         }
         
-        return RequestResult.Ok(background.Background.Photo.ToImageResponse());
+        return RequestResult.Ok(background.Background.Photo.ToResponse());
     }
 
     public async Task<RequestResult> PutAccountProfileBackground(AccountBackgroundPictureRequest data)
@@ -221,7 +221,7 @@ public class AccountsControllerService : IAccountsControllerService
         }
         await _database.SaveChangesAsync();
         
-        return RequestResult.Ok(background.Background.Photo.ToImageResponse());
+        return RequestResult.Ok(background.Background.Photo.ToResponse());
     }
     
     public async Task<RequestResult> DeleteAccountProfileBackground()

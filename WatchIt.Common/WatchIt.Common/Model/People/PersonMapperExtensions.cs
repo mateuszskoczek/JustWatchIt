@@ -42,7 +42,7 @@ public static class PersonMapperExtensions
     {
         PersonUserRatedResponse response = new PersonUserRatedResponse();
         response.SetMediumResponseProperties(entity);
-        response.RatingUser = entity.Roles.SelectMany(x => x.Ratings.Where(y => y.AccountId == accountId)).GetRatingUserOverallResponseFromRatingEntitiesCollection();
+        response.RatingUser = entity.Roles.SelectMany(x => x.Ratings.Where(y => y.AccountId == accountId)).ToUserOverallResponse();
         return response;
     }
 
@@ -74,7 +74,7 @@ public static class PersonMapperExtensions
         response.BirthDate = entity.BirthDate;
         response.DeathDate = entity.DeathDate;
         response.Gender = entity.Gender?.ToGenderResponse();
-        response.Rating = entity.Roles.SelectMany(x => x.Ratings).GetRatingResponseFromRatingEntitiesCollection();
+        response.Rating = entity.Roles.SelectMany(x => x.Ratings).ToOverallResponse();
     }
     
     #endregion

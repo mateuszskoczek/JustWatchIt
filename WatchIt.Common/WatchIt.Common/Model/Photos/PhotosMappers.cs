@@ -4,27 +4,34 @@ using WatchIt.Common.Model.Photos.PhotoBackground;
 
 namespace WatchIt.Common.Model.Photos;
 
-public static class PhotoMapperExtensions
+public static class PhotosMappers
 {
     #region PUBLIC METHODS
 
     #region Photo
 
-    public static PhotoResponse ToPhotoResponse(this Database.Model.Photos.Photo entity) => new PhotoResponse
+    public static Database.Model.Photos.Photo ToEntity(this PhotoRequest request) => new Database.Model.Photos.Photo
+    {
+        MediumId = request.MediumId,
+        Image = request.Image,
+        MimeType = request.MimeType,
+    };
+    
+    public static PhotoResponse ToResponse(this Database.Model.Photos.Photo entity) => new PhotoResponse
     {
         Id = entity.Id,
         MediumId = entity.MediumId,
         Image = entity.Image,
         MimeType = entity.MimeType,
         UploadDate = entity.UploadDate,
-        Background = entity.Background?.ToPhotoBackgroundResponse()
+        Background = entity.Background?.ToResponse()
     };
 
     #endregion
     
     #region PhotoBackground
 
-    public static Database.Model.Photos.PhotoBackground ToPhotoBackgroundEntity(this PhotoBackgroundRequest request, Guid photoId) => new Database.Model.Photos.PhotoBackground
+    public static Database.Model.Photos.PhotoBackground ToEntity(this PhotoBackgroundRequest request, Guid photoId) => new Database.Model.Photos.PhotoBackground
     {
         PhotoId = photoId,
         IsUniversal = request.IsUniversal,
@@ -39,7 +46,7 @@ public static class PhotoMapperExtensions
         entity.SecondGradientColor = request.SecondGradientColor;
     }
 
-    public static PhotoBackgroundResponse ToPhotoBackgroundResponse(this Database.Model.Photos.PhotoBackground entity) => new PhotoBackgroundResponse
+    public static PhotoBackgroundResponse ToResponse(this Database.Model.Photos.PhotoBackground entity) => new PhotoBackgroundResponse
     {
         IsUniversal = entity.IsUniversal,
         FirstGradientColor = entity.FirstGradientColor,

@@ -2,18 +2,18 @@ using WatchIt.Database.Model;
 
 namespace WatchIt.Common.Model.Generics.Image;
 
-public static class ImageMapperExtensions
+public static class ImageMappers
 {
     #region PUBLIC METHODS
     
-    public static ImageResponse ToImageResponse(this IImageEntity entity) => new ImageResponse
+    public static ImageResponse ToResponse(this IImageEntity entity) => new ImageResponse
     {
         Image = entity.Image,
         MimeType = entity.MimeType,
         UploadDate = entity.UploadDate,
     };
     
-    public static void UpdateImageEntityWithRequest(this IImageEntity entity, ImageRequest request)
+    public static void UpdateWithRequest(this IImageEntity entity, ImageRequest request)
     {
         entity.Image = request.Image;
         entity.MimeType = request.MimeType;

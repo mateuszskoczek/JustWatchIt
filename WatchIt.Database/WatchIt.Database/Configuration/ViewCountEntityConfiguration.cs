@@ -19,7 +19,8 @@ public abstract class ViewCountEntityConfiguration<T> : IEntityTypeConfiguration
         
         // Date
         builder.Property(x => x.Date)
-               .IsRequired();
+               .IsRequired()
+               .HasDefaultValueSql("now()");
         
         // View count
         builder.Property(x => x.ViewCount)

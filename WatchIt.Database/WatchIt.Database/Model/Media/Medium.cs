@@ -27,7 +27,7 @@ public abstract class Medium
     public virtual IEnumerable<Genre> Genres { get; set; } = [];
     
     // Picture
-    public virtual MediumPicture Picture { get; set; } = default!;
+    public virtual MediumPicture? Picture { get; set; }
     
     // Photos
     public virtual IEnumerable<Photo> Photos { get; set; } = [];

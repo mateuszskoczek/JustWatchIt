@@ -177,7 +177,7 @@ public class PersonsControllerService : IPersonsControllerService
         {
             return RequestResult.NotFound();
         }
-        return RequestResult.Ok(picture.ToImageResponse());
+        return RequestResult.Ok(picture.ToResponse());
     }
 
     public async Task<RequestResult> PutPersonPhoto(long id, ImageRequest data)
@@ -201,11 +201,11 @@ public class PersonsControllerService : IPersonsControllerService
         }
         else
         {
-            picture.UpdateImageEntityWithRequest(data);
+            picture.UpdateWithRequest(data);
         }
         
         await _database.SaveChangesAsync();
-        return RequestResult.Ok(picture.ToImageResponse());
+        return RequestResult.Ok(picture.ToResponse());
     }
 
     public async Task<RequestResult> DeletePersonPhoto(long id)
@@ -241,7 +241,7 @@ public class PersonsControllerService : IPersonsControllerService
             
         IEnumerable<RoleActorResponse> data = person.Roles
                                                     .OfType<RoleActor>()
-                                                    .Select(x => x.ToRoleActorResponse())
+                                                    .Select(x => x.ToResponse())
                                                     .PrepareData(query);
         return RequestResult.Ok(data);
     }
@@ -256,7 +256,7 @@ public class PersonsControllerService : IPersonsControllerService
             
         IEnumerable<RoleCreatorResponse> data = person.Roles
                                                     .OfType<RoleCreator>()
-                                                    .Select(x => x.ToRoleCreatorResponse())
+                                                    .Select(x => x.ToResponse())
                                                     .PrepareData(query);
         return RequestResult.Ok(data);
     }
@@ -275,7 +275,7 @@ public class PersonsControllerService : IPersonsControllerService
 
         RatingOverallResponse response = item.Roles
                                              .SelectMany(x => x.Ratings)
-                                             .GetRatingResponseFromRatingEntitiesCollection();
+                                             .ToOverallResponse();
         return RequestResult.Ok(response);
     }
 
@@ -290,7 +290,7 @@ public class PersonsControllerService : IPersonsControllerService
         RatingUserOverallResponse response = item.Roles
                                                  .SelectMany(x => x.Ratings
                                                                    .Where(y => y.AccountId == userId))
-                                                 .GetRatingUserOverallResponseFromRatingEntitiesCollection();
+                                                 .ToUserOverallResponse();
         return RequestResult.Ok(response);
     }
 
